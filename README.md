@@ -353,7 +353,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ### Getting Help
 - **Documentation** - Check the [Wiki](../../wiki) for detailed guides
-- **Discussions** - Join [GitHub Discussions](../../discussions) for community support
 - **Issues** - Report bugs in [GitHub Issues](../../issues)
 - **Contact** - Reach out for enterprise support
 
