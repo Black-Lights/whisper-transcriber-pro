@@ -133,6 +133,7 @@ ipython_config.py
 .mypy_cache/
 .dmypy.json
 dmypy.json
+create_release.py
 
 # Pyre type checker
 .pyre/

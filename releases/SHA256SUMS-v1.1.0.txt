@@ -1,0 +1,6 @@
+# SHA256 Checksums for Whisper Transcriber Pro v1.1.0
+# Generated: 2025-05-30 21:43:04 UTC
+
+b6c556b5a5b25df56ad189dd2a24d7e5943555f84c96dca27621fc13dc7d50ec  whisper-transcriber-pro-v1.1.0-linux.tar.gz
+96a831c6dfcda69a9f7ef5fdfd90a53db9d5f36a608013143721000df72b62bb  whisper-transcriber-pro-v1.1.0-source.zip
+6aa0453a485ad66bdfd2194bcc1dff09e724603763a1cb09660db6b675bf18ff  whisper-transcriber-pro-v1.1.0-windows.zip

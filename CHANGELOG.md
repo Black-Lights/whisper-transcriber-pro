@@ -5,106 +5,112 @@ All notable changes to Whisper Transcriber Pro will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-[Unreleased]
-Planned Features
+## [Unreleased]
 
- Batch processing for multiple files
- Custom model training support
- Plugin system for third-party integrations
- Web interface option
- API endpoints for programmatic access
- Speaker diarization (identify different speakers)
- Audio noise reduction preprocessing
- Multi-language document export
- Cloud storage integration (Google Drive, Dropbox)
- Real-time transcription from microphone
+### Planned Features
 
-[1.1.0] - 2025-05-30
-Enhanced Progress Tracking and Bug Fixes
+- Batch processing for multiple files
+- Custom model training support
+- Plugin system for third-party integrations
+- Web interface option
+- API endpoints for programmatic access
+- Speaker diarization (identify different speakers)
+- Audio noise reduction preprocessing
+- Multi-language document export
+- Cloud storage integration (Google Drive, Dropbox)
+- Real-time transcription from microphone
+
+## [1.1.0] - 2025-05-30
+
+### Enhanced Progress Tracking and Bug Fixes
+
 This release significantly improves the user experience with detailed progress tracking, expected completion times, and critical bug fixes.
-Added
-Enhanced Progress System
 
-Real-Time Progress Bar - Determinate progress bar showing actual percentage (0-100%)
-Expected Time of Completion (ETA) - Smart calculation based on processing speed and remaining segments
-Detailed Status Messages - Stage-specific updates (Loading model, Processing segment X, Detecting language)
-Processing Speed Display - Real-time speed metrics (e.g., "3.2x real-time")
-Enhanced Time Information - Elapsed time, ETA, and speed all displayed simultaneously
+### Added
 
-Smart Progress Estimation
+#### Enhanced Progress System
 
-Segment-Based Tracking - Estimates total segments based on file duration
-Dynamic ETA Calculation - Updates estimated completion time as processing speed changes
-Performance Metrics - Live tracking of processing speed and efficiency
-Stage-Aware Progress - Different progress calculation for model loading vs transcription
+- **Real-Time Progress Bar** - Determinate progress bar showing actual percentage (0-100%)
+- **Expected Time of Completion (ETA)** - Smart calculation based on processing speed and remaining segments
+- **Detailed Status Messages** - Stage-specific updates (Loading model, Processing segment X, Detecting language)
+- **Processing Speed Display** - Real-time speed metrics (e.g., "3.2x real-time")
+- **Enhanced Time Information** - Elapsed time, ETA, and speed all displayed simultaneously
 
-Improved User Interface
+#### Smart Progress Estimation
 
-Progress Percentage Display - Clear percentage indicator below progress bar
-Multi-Line Status - Separate displays for main status, timing info, and percentage
-Professional Status Messages - Clean, informative progress updates without icons
+- **Segment-Based Tracking** - Estimates total segments based on file duration
+- **Dynamic ETA Calculation** - Updates estimated completion time as processing speed changes
+- **Performance Metrics** - Live tracking of processing speed and efficiency
+- **Stage-Aware Progress** - Different progress calculation for model loading vs transcription
 
-Fixed
-Critical Bug Fixes
+#### Improved User Interface
 
-Language Auto-Detection - Fixed "unsupported language none" error when using auto-detect
-Boolean Conversion Error - Fixed "name 'false' is not defined" in transcription script generation
-Script Generation - Proper handling of Python boolean values in generated transcription scripts
-Language Parameter Handling - Correct passing of language options to Whisper engine
+- **Progress Percentage Display** - Clear percentage indicator below progress bar
+- **Multi-Line Status** - Separate displays for main status, timing info, and percentage
+- **Professional Status Messages** - Clean, informative progress updates without icons
 
-Installation Improvements
+### Fixed
 
-Setuptools Compatibility - Install compatible setuptools version to avoid pkg_resources deprecation warnings
-Enhanced Error Handling - Better pip upgrade error handling with fallback methods
-Robust Package Installation - Fallback installation methods for openai-whisper
-Professional Installer Output - Removed unprofessional icons from installer messages
+#### Critical Bug Fixes
 
-Environment Management
+- **Language Auto-Detection** - Fixed "unsupported language none" error when using auto-detect
+- **Boolean Conversion Error** - Fixed "name 'false' is not defined" in transcription script generation
+- **Script Generation** - Proper handling of Python boolean values in generated transcription scripts
+- **Language Parameter Handling** - Correct passing of language options to Whisper engine
 
-Pip Upgrade Handling - Smart handling of pip upgrade restrictions in Python 3.13+
-GPU Detection - Improved NVIDIA GPU detection and CUDA environment setup
-Package Installation Order - Strategic installation order to avoid dependency conflicts
+#### Installation Improvements
 
-Changed
-Progress Display
+- **Setuptools Compatibility** - Install compatible setuptools version to avoid pkg_resources deprecation warnings
+- **Enhanced Error Handling** - Better pip upgrade error handling with fallback methods
+- **Robust Package Installation** - Fallback installation methods for openai-whisper
+- **Professional Installer Output** - Removed unprofessional icons from installer messages
 
-Progress Bar Mode - Changed from indeterminate to determinate for better user feedback
-Status Layout - Reorganized progress section with clearer information hierarchy
-Time Formatting - Improved time display formatting (seconds/minutes/hours)
+#### Environment Management
 
-User Experience
+- **Pip Upgrade Handling** - Smart handling of pip upgrade restrictions in Python 3.13+
+- **GPU Detection** - Improved NVIDIA GPU detection and CUDA environment setup
+- **Package Installation Order** - Strategic installation order to avoid dependency conflicts
 
-Error Messages - More informative error messages with troubleshooting hints
-Installation Process - Cleaner, more professional installation output
-File Information - Enhanced file analysis and duration estimation
+### Changed
 
-Technical Improvements
-Transcription Engine
+#### Progress Display
 
-Script Generation - Improved Python script generation with proper boolean handling
-Language Processing - Better handling of auto-detect vs specific language selection
-Progress Monitoring - Enhanced progress monitoring with segment-level tracking
-Error Recovery - Better error handling and user feedback
+- **Progress Bar Mode** - Changed from indeterminate to determinate for better user feedback
+- **Status Layout** - Reorganized progress section with clearer information hierarchy
+- **Time Formatting** - Improved time display formatting (seconds/minutes/hours)
 
-Performance Optimization
+#### User Experience
 
-Memory Management - Improved memory usage during transcription
-Resource Monitoring - Better tracking of system resource usage
-Processing Speed - Optimized segment processing for better performance estimates
+- **Error Messages** - More informative error messages with troubleshooting hints
+- **Installation Process** - Cleaner, more professional installation output
+- **File Information** - Enhanced file analysis and duration estimation
 
-Developer Experience
+### Technical Improvements
 
-Code Quality - Improved error handling and validation throughout codebase
-Debug Information - Better logging and error reporting for troubleshooting
-Installation Robustness - More reliable automated installation process
+#### Transcription Engine
 
-Compatibility
+- **Script Generation** - Improved Python script generation with proper boolean handling
+- **Language Processing** - Better handling of auto-detect vs specific language selection
+- **Progress Monitoring** - Enhanced progress monitoring with segment-level tracking
+- **Error Recovery** - Better error handling and user feedback
 
-Python 3.13+ - Full compatibility with latest Python versions
-Modern Pip - Compatibility with latest pip versions and restrictions
-CUDA 11.8+ - Updated GPU support for latest NVIDIA drivers
+#### Performance Optimization
 
----
+- **Memory Management** - Improved memory usage during transcription
+- **Resource Monitoring** - Better tracking of system resource usage
+- **Processing Speed** - Optimized segment processing for better performance estimates
+
+#### Developer Experience
+
+- **Code Quality** - Improved error handling and validation throughout codebase
+- **Debug Information** - Better logging and error reporting for troubleshooting
+- **Installation Robustness** - More reliable automated installation process
+
+#### Compatibility
+
+- **Python 3.13+** - Full compatibility with latest Python versions
+- **Modern Pip** - Compatibility with latest pip versions and restrictions
+- **CUDA 11.8+** - Updated GPU support for latest NVIDIA drivers
 
 ## [1.0.0] - 2025-05-30
 
@@ -288,8 +294,6 @@ This initial release represents months of development effort focused on creating
 - Real-time processing feedback
 - Comprehensive format support
 
----
-
 ## Versioning Strategy
 
 This project follows [Semantic Versioning](https://semver.org/):
@@ -307,8 +311,6 @@ This project follows [Semantic Versioning](https://semver.org/):
 - `1.1.1` - Bug fixes
 - `2.0.0-beta.1` - Major version pre-release
 - `1.2.0+20241215` - Build metadata
-
----
 
 ## Release Notes Template
 
@@ -336,8 +338,6 @@ For future releases, the following template will be used:
 - Security-related improvements
 ```
 
----
-
 ## Support and Maintenance
 
 ### Long-Term Support (LTS)
@@ -351,8 +351,6 @@ For future releases, the following template will be used:
 - **Patch Releases**: Monthly bug fixes (as needed)
 - **Security Releases**: Immediate for critical issues
 
----
-
 ## Author and Attribution
 
 **Author**: Black-Lights (https://github.com/Black-Lights)
@@ -363,4 +361,4 @@ For future releases, the following template will be used:
 
 ---
 
-*For more information about releases, visit the [GitHub Releases](../../releases) page.*# Changelog
+*For more information about releases, visit the [GitHub Releases](https://github.com/Black-Lights/whisper-transcriber-pro/releases) page.*
