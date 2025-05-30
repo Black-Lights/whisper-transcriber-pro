@@ -3,7 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey)](https://github.com/Black-Lights/whisper-transcriber-pro)
-[![Version](https://img.shields.io/badge/version-1.0.0-green.svg)](https://github.com/Black-Lights/whisper-transcriber-pro/releases)
+[![Version](https://img.shields.io/badge/version-1.1.0-green.svg)](https://github.com/Black-Lights/whisper-transcriber-pro/releases)
 [![Release](https://img.shields.io/github/v/release/Black-Lights/whisper-transcriber-pro)](https://github.com/Black-Lights/whisper-transcriber-pro/releases)
 [![Downloads](https://img.shields.io/github/downloads/Black-Lights/whisper-transcriber-pro/total)](https://github.com/Black-Lights/whisper-transcriber-pro/releases)
 
