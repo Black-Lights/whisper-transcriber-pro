@@ -57,6 +57,14 @@ transcripts/
 *.vtt
 *_detailed.txt
 
+# Installer Generated Files
+Setup.bat
+Whisper_Transcriber.bat
+whisper_transcriber.sh
+uninstall.py
+*.lnk
+*.desktop
+
 # IDE and Editors
 .vscode/
 .idea/
@@ -77,7 +85,6 @@ Thumbs.db
 desktop.ini
 
 # Windows
-*.lnk
 *.exe
 *.msi
 

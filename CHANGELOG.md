@@ -5,19 +5,106 @@ All notable changes to Whisper Transcriber Pro will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+[Unreleased]
+Planned Features
 
-### Planned Features
-- [ ] Batch processing for multiple files
-- [ ] Custom model training support
-- [ ] Plugin system for third-party integrations
-- [ ] Web interface option
-- [ ] API endpoints for programmatic access
-- [ ] Speaker diarization (identify different speakers)
-- [ ] Audio noise reduction preprocessing
-- [ ] Multi-language document export
-- [ ] Cloud storage integration (Google Drive, Dropbox)
-- [ ] Real-time transcription from microphone
+ Batch processing for multiple files
+ Custom model training support
+ Plugin system for third-party integrations
+ Web interface option
+ API endpoints for programmatic access
+ Speaker diarization (identify different speakers)
+ Audio noise reduction preprocessing
+ Multi-language document export
+ Cloud storage integration (Google Drive, Dropbox)
+ Real-time transcription from microphone
+
+[1.1.0] - 2025-05-30
+Enhanced Progress Tracking and Bug Fixes
+This release significantly improves the user experience with detailed progress tracking, expected completion times, and critical bug fixes.
+Added
+Enhanced Progress System
+
+Real-Time Progress Bar - Determinate progress bar showing actual percentage (0-100%)
+Expected Time of Completion (ETA) - Smart calculation based on processing speed and remaining segments
+Detailed Status Messages - Stage-specific updates (Loading model, Processing segment X, Detecting language)
+Processing Speed Display - Real-time speed metrics (e.g., "3.2x real-time")
+Enhanced Time Information - Elapsed time, ETA, and speed all displayed simultaneously
+
+Smart Progress Estimation
+
+Segment-Based Tracking - Estimates total segments based on file duration
+Dynamic ETA Calculation - Updates estimated completion time as processing speed changes
+Performance Metrics - Live tracking of processing speed and efficiency
+Stage-Aware Progress - Different progress calculation for model loading vs transcription
+
+Improved User Interface
+
+Progress Percentage Display - Clear percentage indicator below progress bar
+Multi-Line Status - Separate displays for main status, timing info, and percentage
+Professional Status Messages - Clean, informative progress updates without icons
+
+Fixed
+Critical Bug Fixes
+
+Language Auto-Detection - Fixed "unsupported language none" error when using auto-detect
+Boolean Conversion Error - Fixed "name 'false' is not defined" in transcription script generation
+Script Generation - Proper handling of Python boolean values in generated transcription scripts
+Language Parameter Handling - Correct passing of language options to Whisper engine
+
+Installation Improvements
+
+Setuptools Compatibility - Install compatible setuptools version to avoid pkg_resources deprecation warnings
+Enhanced Error Handling - Better pip upgrade error handling with fallback methods
+Robust Package Installation - Fallback installation methods for openai-whisper
+Professional Installer Output - Removed unprofessional icons from installer messages
+
+Environment Management
+
+Pip Upgrade Handling - Smart handling of pip upgrade restrictions in Python 3.13+
+GPU Detection - Improved NVIDIA GPU detection and CUDA environment setup
+Package Installation Order - Strategic installation order to avoid dependency conflicts
+
+Changed
+Progress Display
+
+Progress Bar Mode - Changed from indeterminate to determinate for better user feedback
+Status Layout - Reorganized progress section with clearer information hierarchy
+Time Formatting - Improved time display formatting (seconds/minutes/hours)
+
+User Experience
+
+Error Messages - More informative error messages with troubleshooting hints
+Installation Process - Cleaner, more professional installation output
+File Information - Enhanced file analysis and duration estimation
+
+Technical Improvements
+Transcription Engine
+
+Script Generation - Improved Python script generation with proper boolean handling
+Language Processing - Better handling of auto-detect vs specific language selection
+Progress Monitoring - Enhanced progress monitoring with segment-level tracking
+Error Recovery - Better error handling and user feedback
+
+Performance Optimization
+
+Memory Management - Improved memory usage during transcription
+Resource Monitoring - Better tracking of system resource usage
+Processing Speed - Optimized segment processing for better performance estimates
+
+Developer Experience
+
+Code Quality - Improved error handling and validation throughout codebase
+Debug Information - Better logging and error reporting for troubleshooting
+Installation Robustness - More reliable automated installation process
+
+Compatibility
+
+Python 3.13+ - Full compatibility with latest Python versions
+Modern Pip - Compatibility with latest pip versions and restrictions
+CUDA 11.8+ - Updated GPU support for latest NVIDIA drivers
+
+---
 
 ## [1.0.0] - 2025-05-30
 

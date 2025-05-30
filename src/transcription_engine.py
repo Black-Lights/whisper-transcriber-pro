@@ -1,7 +1,5 @@
 """
 Transcription Engine - Core transcription functionality
-Author: Black-Lights (https://github.com/Black-Lights)
-Project: Whisper Transcriber Pro
 """
 
 import os
@@ -152,6 +150,16 @@ class TranscriptionEngine:
     
     def create_transcription_script(self, input_file, options):
         """Create Python script for transcription"""
+        # Convert boolean to proper Python boolean string
+        word_timestamps_value = "True" if options.get('word_timestamps', False) else "False"
+        
+        # Handle language option properly
+        language = options.get('language', '')
+        if language and language != 'auto':
+            language_line = f'        transcribe_options["language"] = "{language}"'
+        else:
+            language_line = '        # Auto-detect language (no language parameter)'
+        
         script = f'''
 import os
 os.environ['CUDA_VISIBLE_DEVICES'] = '0' if '{options["device"]}' == 'gpu' else ''
@@ -175,13 +183,11 @@ def main():
             "verbose": True
         }}
         
-        # Add language if specified
-        language = "{options.get('language', '')}"
-        if language:
-            transcribe_options["language"] = language
+        # Add language if specified (not auto)
+{language_line}
         
         # Add word timestamps if requested
-        if {str(options.get('word_timestamps', False)).lower()}:
+        if {word_timestamps_value}:
             transcribe_options["word_timestamps"] = True
         
         # Transcribe

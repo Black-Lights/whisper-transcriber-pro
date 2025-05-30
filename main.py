@@ -34,7 +34,7 @@ class WhisperTranscriberGUI:
             root: The main tkinter window
         """
         self.root = root
-        self.root.title("Whisper Transcriber Pro v1.0.0")
+        self.root.title("Whisper Transcriber Pro v1.1.0")
         self.root.geometry("900x700")
         self.root.resizable(True, True)
         
@@ -220,17 +220,21 @@ class WhisperTranscriberGUI:
         progress_frame.grid(row=row, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=5)
         progress_frame.columnconfigure(0, weight=1)
         
-        # Progress bar
-        self.progress = ttk.Progressbar(progress_frame, mode='indeterminate')
+        # Progress bar (determinant mode for percentage)
+        self.progress = ttk.Progressbar(progress_frame, mode='determinate', maximum=100)
         self.progress.grid(row=0, column=0, sticky=(tk.W, tk.E), pady=(0, 5))
         
-        # Progress label
+        # Main progress label
         self.progress_label = ttk.Label(progress_frame, text="Ready to start")
         self.progress_label.grid(row=1, column=0, sticky=tk.W)
         
         # Time and speed info
         self.time_label = ttk.Label(progress_frame, text="", foreground="gray")
         self.time_label.grid(row=2, column=0, sticky=tk.W)
+        
+        # Percentage label
+        self.percentage_label = ttk.Label(progress_frame, text="", foreground="blue")
+        self.percentage_label.grid(row=3, column=0, sticky=tk.W)
     
     def create_control_buttons(self, parent, row):
         """Create control buttons"""
@@ -425,7 +429,10 @@ large: Best accuracy, slowest (~1550 MB)
             try:
                 self.is_processing = True
                 self.start_button.config(text="Stop")
-                self.progress.start()
+                
+                # Reset progress
+                self.progress['value'] = 0
+                self.percentage_label.config(text="0%")
                 
                 # Initialize transcription engine
                 self.transcription_engine = TranscriptionEngine(self.env_manager)
@@ -449,9 +456,6 @@ large: Best accuracy, slowest (~1550 MB)
                     progress_callback=self.update_transcription_progress
                 )
                 
-                self.progress.stop()
-                self.progress_label.config(text="Transcription completed!")
-                
                 if result['success']:
                     self.status_var.set("Transcription completed successfully")
                     
@@ -464,13 +468,14 @@ large: Best accuracy, slowest (~1550 MB)
                     messagebox.showerror("Error", f"Transcription failed: {result['error']}")
                 
             except Exception as e:
-                self.progress.stop()
                 self.status_var.set("Transcription error")
                 messagebox.showerror("Error", f"Transcription failed: {e}")
             
             finally:
                 self.is_processing = False
                 self.start_button.config(text="Start Transcription")
+                self.progress['value'] = 0
+                self.percentage_label.config(text="")
         
         threading.Thread(target=transcription_worker, daemon=True).start()
     
@@ -480,7 +485,8 @@ large: Best accuracy, slowest (~1550 MB)
             self.transcription_engine.stop()
         
         self.is_processing = False
-        self.progress.stop()
+        self.progress['value'] = 0
+        self.percentage_label.config(text="")
         self.start_button.config(text="Start Transcription")
         self.status_var.set("Transcription stopped")
     
@@ -489,11 +495,20 @@ large: Best accuracy, slowest (~1550 MB)
         self.root.after(0, lambda: self.progress_label.config(text=message))
     
     def update_transcription_progress(self, progress_info):
-        """Update transcription progress"""
+        """Update transcription progress with enhanced information"""
         def update_ui():
+            # Update main progress message
             self.progress_label.config(text=progress_info['message'])
+            
+            # Update time information
             if 'time_info' in progress_info:
                 self.time_label.config(text=progress_info['time_info'])
+            
+            # Update progress bar and percentage
+            if 'progress_percent' in progress_info:
+                progress_value = min(100, max(0, progress_info['progress_percent']))
+                self.progress['value'] = progress_value
+                self.percentage_label.config(text=f"{progress_value:.0f}%")
         
         self.root.after(0, update_ui)
     

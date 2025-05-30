@@ -1,7 +1,5 @@
 """
 Environment Manager - Handles virtual environment setup and package installation
-Author: Black-Lights (https://github.com/Black-Lights)
-Project: Whisper Transcriber Pro
 """
 
 import os
@@ -127,7 +125,7 @@ class EnvironmentManager:
         """Set up virtual environment and install packages"""
         try:
             if progress_callback:
-                progress_callback("🔧 Setting up virtual environment...")
+                progress_callback("Setting up virtual environment...")
             
             # Remove existing venv if it exists but is broken
             if self.venv_dir.exists():
@@ -142,19 +140,51 @@ class EnvironmentManager:
                 venv.create(self.venv_dir, with_pip=True)
             
             if progress_callback:
-                progress_callback("📦 Upgrading pip...")
+                progress_callback("Upgrading pip...")
             
-            # Upgrade pip
-            self.run_pip_command(["install", "--upgrade", "pip"])
+            # Try to upgrade pip with better error handling
+            try:
+                self.run_pip_command(["install", "--upgrade", "pip"])
+            except Exception as e:
+                # If pip upgrade fails due to the new pip restrictions, try alternative method
+                error_msg = str(e).lower()
+                if "to modify pip, please run the following command" in error_msg:
+                    if progress_callback:
+                        progress_callback("Using alternative pip upgrade method...")
+                    try:
+                        # Use python -m pip method
+                        result = subprocess.run([str(self.python_exe), "-m", "pip", "install", "--upgrade", "pip"], 
+                                              capture_output=True, text=True, timeout=300)
+                        if result.returncode != 0:
+                            print(f"Warning: Could not upgrade pip: {result.stderr}")
+                            if progress_callback:
+                                progress_callback("Continuing with current pip version...")
+                    except Exception as e2:
+                        print(f"Warning: Pip upgrade failed, continuing anyway: {e2}")
+                        if progress_callback:
+                            progress_callback("Continuing with current pip version...")
+                else:
+                    raise e
             
             if progress_callback:
-                progress_callback("🔍 Detecting GPU support...")
+                progress_callback("Detecting GPU support...")
             
             # Detect GPU and install appropriate packages
             gpu_available = self.detect_gpu_support()
             
             if progress_callback:
-                progress_callback("📥 Installing Whisper and dependencies...")
+                progress_callback("Installing Whisper and dependencies...")
+            
+            # Install compatible setuptools first to avoid pkg_resources issues
+            if progress_callback:
+                progress_callback("Installing compatible setuptools...")
+            
+            try:
+                # Install a compatible version of setuptools that doesn't have the pkg_resources deprecation issue
+                self.run_pip_command(["install", "setuptools<70.0.0"])
+            except Exception as e:
+                print(f"Warning: Could not install compatible setuptools: {e}")
+                # Continue anyway, as this might not be critical
             
             # Install packages based on GPU availability
             if gpu_available:
@@ -165,14 +195,14 @@ class EnvironmentManager:
                 self.install_cpu_packages(progress_callback)
             
             if progress_callback:
-                progress_callback("✅ Environment setup complete!")
+                progress_callback("Environment setup complete!")
             
             return True
             
         except Exception as e:
             print(f"Environment setup failed: {e}")
             if progress_callback:
-                progress_callback(f"❌ Setup failed: {e}")
+                progress_callback(f"Setup failed: {e}")
             return False
     
     def detect_gpu_support(self):
@@ -187,7 +217,6 @@ class EnvironmentManager:
     def install_cpu_packages(self, progress_callback=None):
         """Install CPU-only packages"""
         packages = [
-            "openai-whisper>=20231117",
             "torch>=2.0.0",
             "torchaudio>=2.0.0",
             "tqdm>=4.65.0",
@@ -199,6 +228,26 @@ class EnvironmentManager:
             if progress_callback:
                 progress_callback(f"Installing {package.split('>=')[0]}...")
             self.run_pip_command(["install", package])
+        
+        # Install openai-whisper last with specific handling
+        if progress_callback:
+            progress_callback("Installing openai-whisper...")
+        
+        try:
+            # Try installing openai-whisper with a specific version that's known to work
+            self.run_pip_command(["install", "openai-whisper==20231117"])
+        except Exception as e:
+            if progress_callback:
+                progress_callback("Trying alternative whisper installation...")
+            try:
+                # Try installing from git if the regular installation fails
+                self.run_pip_command(["install", "git+https://github.com/openai/whisper.git"])
+            except Exception as e2:
+                print(f"Warning: Both whisper installations failed. You may need to install manually.")
+                print(f"Error 1: {e}")
+                print(f"Error 2: {e2}")
+                if progress_callback:
+                    progress_callback("Warning: Whisper installation failed - install manually later")
     
     def install_gpu_packages(self, progress_callback=None):
         """Install GPU-enabled packages"""
@@ -217,7 +266,6 @@ class EnvironmentManager:
         
         # Install other packages
         other_packages = [
-            "openai-whisper>=20231117",
             "tqdm>=4.65.0", 
             "numpy>=1.24.0",
             "ffmpeg-python>=0.2.0"
@@ -227,13 +275,69 @@ class EnvironmentManager:
             if progress_callback:
                 progress_callback(f"Installing {package.split('>=')[0]}...")
             self.run_pip_command(["install", package])
+        
+        # Install openai-whisper last with specific handling
+        if progress_callback:
+            progress_callback("Installing openai-whisper...")
+        
+        try:
+            # Try installing openai-whisper with a specific version that's known to work
+            self.run_pip_command(["install", "openai-whisper==20231117"])
+        except Exception as e:
+            if progress_callback:
+                progress_callback("Trying alternative whisper installation...")
+            try:
+                # Try installing from git if the regular installation fails
+                self.run_pip_command(["install", "git+https://github.com/openai/whisper.git"])
+            except Exception as e2:
+                print(f"Warning: Both whisper installations failed. You may need to install manually.")
+                print(f"Error 1: {e}")
+                print(f"Error 2: {e2}")
+                if progress_callback:
+                    progress_callback("Warning: Whisper installation failed - install manually later")
     
     def run_pip_command(self, args):
-        """Run pip command in virtual environment"""
+        """Run pip command in virtual environment with improved error handling"""
         cmd = [str(self.pip_exe)] + args
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
         
+        # Handle pip upgrade notices and errors more gracefully
         if result.returncode != 0:
+            stderr_lower = result.stderr.lower()
+            
+            # Check if it's just a pip upgrade notice (not a real error)
+            if ("new release of pip is available" in stderr_lower and 
+                "error:" not in stderr_lower and 
+                "failed" not in stderr_lower):
+                print(f"Note: {result.stderr.strip()}")
+                return result
+            
+            # Handle specific pip modification error
+            if "to modify pip, please run the following command" in stderr_lower:
+                print("Attempting to resolve pip upgrade issue...")
+                try:
+                    # Try using python -m pip instead
+                    upgrade_cmd = [str(self.python_exe), "-m", "pip", "install", "--upgrade", "pip"]
+                    upgrade_result = subprocess.run(upgrade_cmd, capture_output=True, text=True, timeout=300)
+                    
+                    if upgrade_result.returncode == 0:
+                        print("Pip upgraded successfully, retrying original command...")
+                        # Retry the original command
+                        retry_result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+                        if retry_result.returncode == 0:
+                            return retry_result
+                        else:
+                            # If retry also fails, raise the original error
+                            raise Exception(f"Pip command failed after retry: {retry_result.stderr}")
+                    else:
+                        print(f"Warning: Could not upgrade pip: {upgrade_result.stderr}")
+                        # Continue with the original error
+                        raise Exception(f"Pip command failed: {result.stderr}")
+                except Exception as upgrade_error:
+                    print(f"Warning: Pip upgrade attempt failed: {upgrade_error}")
+                    raise Exception(f"Pip command failed: {result.stderr}")
+            
+            # For any other error, raise it
             raise Exception(f"Pip command failed: {result.stderr}")
         
         return result
