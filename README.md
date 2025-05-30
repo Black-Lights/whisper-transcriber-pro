@@ -172,8 +172,8 @@ whisper_transcriber_pro/
 │   ├── settings_manager.py    # Configuration persistence
 │   └── utils.py               # Utility functions
 ├── docs/                      # Documentation
-├── tests/                     # Test suite
-└── examples/                  # Usage examples
+├── tests/                     # Test suite (coming soon)
+└── examples/                  # Usage examples (coming soon)
 ```
 
 ### Contributing
