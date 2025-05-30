@@ -376,14 +376,11 @@ A: Yes! Once installed and models downloaded, no internet connection is required
 
 ## Links
 
-- **Homepage** - [Project Website](https://your-website.com)
 - **Releases** - [Download Latest](../../releases)
 - **Documentation** - [Full Documentation](../../wiki)
-- **Community** - [Discord Server](https://discord.gg/your-server)
-- **Updates** - [Twitter](https://twitter.com/your-handle)
 
 ---
 
-**Made with care by the Whisper Transcriber Pro Team**
+**Made with care by the Black-Lights**
 
 [Star this repo](../../stargazers) | [Fork it](../../fork) | [Share](https://twitter.com/intent/tweet?text=Check%20out%20Whisper%20Transcriber%20Pro%20-%20AI-powered%20audio%20transcription!&url=https://github.com/Black-Lights/whisper-transcriber-pro)
