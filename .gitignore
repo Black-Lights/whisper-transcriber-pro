@@ -1,0 +1,329 @@
+# Whisper Transcriber Pro - Git Ignore File
+
+# Virtual Environment
+whisper_env/
+venv/
+env/
+ENV/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Application Specific
+logs/
+*.log
+temp/
+*.tmp
+*.temp
+temp_*.py
+temp_result.json
+
+# Model Cache (Whisper models are large)
+models/
+.cache/
+*.pt
+*.pth
+
+# Settings and User Data
+settings.json
+user_settings.json
+config.json
+
+# Output Files (user generated)
+output/
+transcripts/
+*.srt
+*.vtt
+*_detailed.txt
+
+# IDE and Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+
+# OS Generated
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Windows
+*.lnk
+*.exe
+*.msi
+
+# Linux
+*.AppImage
+*.deb
+*.rpm
+
+# macOS
+*.dmg
+*.pkg
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+
+# Documentation
+docs/_build/
+docs/build/
+site/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# PyCharm
+.idea/
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# Cython debug symbols
+cython_debug/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Application Logs
+error.log
+debug.log
+application.log
+
+# Temporary Installation Files
+*.bat.tmp
+*.sh.tmp
+install_temp/
+
+# User Generated Content
+recent_files.json
+user_preferences.json
+
+# Package Files
+*.tar.gz
+*.zip
+*.rar
+*.7z
+
+# Backup Files
+*.bak
+*.backup
+*.old
+
+# Database Files (if any)
+*.db
+*.sqlite
+*.sqlite3
+
+# Lock Files
+poetry.lock
+Pipfile.lock
+
+# Distribution Archives
+*.tar.xz
+*.tar.bz2
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Unit test / coverage reports
+.coverage.*
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# Sphinx documentation
+docs/_build/
+
+# Flask instance folder
+instance/
+
+# Scrapy stuff
+.scrapy
+
+# Django stuff
+local_settings.py
+db.sqlite3
+
+# Celery stuff
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+
+# PyCharm specific
+.idea/
+
+# VS Code specific  
+.vscode/settings.json
+.vscode/tasks.json
+.vscode/launch.json
+.vscode/extensions.json
+
+# Ignore compiled Python files
+*.pyc
+
+# Ignore temporary Python files
+*.pyo
+
+# Ignore Python cache directories
+__pycache__/
+
+# Ignore setuptools distribution directory
+build/
+dist/
+*.egg-info/
+
+# Application specific temporary files
+transcription_progress.json
+current_session.json
+
+# Ignore any user-specific launcher scripts
+*_user.bat
+*_user.sh
+
+# Ignore any custom configuration files
+custom_config.py
+user_config.py
+
+# Ignore any benchmark or test output files
+benchmark_results.json
+test_output/
+performance_logs/
+
+# Ignore any generated desktop shortcuts
+*.desktop
+
+# Ignore any custom themes or UI files
+themes/
+custom_ui/
+
+# Ignore large media files that might be used for testing
+test_media/
+sample_files/
+*.mp4
+*.mp3
+*.wav
+*.avi
+*.mkv
+*.mov
+*.flac
+*.ogg
+*.m4a
+*.wma
+*.aac
+*.webm
+*.flv
+*.wmv
+
+# Exception: Allow small sample files in examples directory
+!examples/*.mp3
+!examples/*.wav
+!examples/sample_*.mp4
+
+# Ignore any user manuals or guides that are auto-generated
+user_manual.pdf
+quick_start.pdf
+
+# Ignore any error dumps or crash reports
+crash_reports/
+error_dumps/
+*.dmp
+
+# Ignore any profiling output
+*.prof
+profiling_results/
+
+# Ignore any benchmark data
+benchmarks/
+performance_data/
+
+# Ignore any user-created scripts
+user_scripts/
+custom_tools/
+
+# But keep the examples directory structure
+!examples/
+!examples/README.md
+
+# Keep important documentation
+!README.md
+!LICENSE
+!CHANGELOG.md
+!CONTRIBUTING.md
+!docs/
+!docs/**/*.md

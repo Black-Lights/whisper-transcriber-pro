@@ -1,0 +1,114 @@
+MIT License
+
+Copyright (c) 2024 Black-Lights (https://github.com/Black-Lights)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+================================================================================
+
+THIRD-PARTY SOFTWARE ACKNOWLEDGMENTS
+
+This project incorporates and builds upon the following third-party software:
+
+OpenAI Whisper
+Copyright (c) 2022 OpenAI
+Licensed under the MIT License
+https://github.com/openai/whisper
+
+This software uses OpenAI's Whisper automatic speech recognition system as its
+core transcription engine. Whisper is a neural net that approaches human level
+robustness and accuracy on English speech recognition.
+
+Citation for Whisper:
+Radford, A., Kim, J. W., Xu, T., Brockman, G., McLeavey, C., & Sutskever, I. (2022).
+Robust Speech Recognition via Large-Scale Weak Supervision. arXiv preprint arXiv:2212.04356.
+
+PyTorch
+Copyright (c) 2016-2023 Facebook, Inc (Adam Paszke)
+Copyright (c) 2014-2023 Facebook, Inc
+Licensed under the BSD 3-Clause License
+https://github.com/pytorch/pytorch
+
+NumPy
+Copyright (c) 2005-2023, NumPy Developers
+Licensed under the BSD 3-Clause License
+https://github.com/numpy/numpy
+
+tqdm
+Copyright (c) 2013 noamraph
+Licensed under the MIT License and Mozilla Public License 2.0
+https://github.com/tqdm/tqdm
+
+FFmpeg (optional dependency)
+Copyright (c) 2000-2023 the FFmpeg developers
+Licensed under the GNU Lesser General Public License (LGPL) version 2.1+
+https://ffmpeg.org/
+
+================================================================================
+
+ATTRIBUTION REQUIREMENTS
+
+When using this software, please maintain the following attributions:
+
+1. This software is created by Black-Lights (https://github.com/Black-Lights)
+2. This software uses OpenAI's Whisper model for speech recognition
+3. Include this license file in any distribution of the software
+
+For academic or research use, please cite:
+- The original Whisper paper (see citation above)
+- This software repository: https://github.com/Black-Lights/whisper-transcriber-pro
+
+================================================================================
+
+DISCLAIMER
+
+THE SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS
+OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING, WITHOUT LIMITATION, ANY
+WARRANTIES OR CONDITIONS OF TITLE, NON-INFRINGEMENT, MERCHANTABILITY, OR
+FITNESS FOR A PARTICULAR PURPOSE.
+
+You are solely responsible for determining the appropriateness of using or
+redistributing the Work and assume any risks associated with Your exercise of
+permissions under this License.
+
+================================================================================
+
+LIMITATION OF LIABILITY
+
+IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING WILL THE
+COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MODIFIES AND/OR CONVEYS THE PROGRAM AS
+PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL, SPECIAL,
+INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE
+THE PROGRAM (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA BEING RENDERED
+INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES OR A FAILURE OF THE
+PROGRAM TO OPERATE WITH ANY OTHER PROGRAMS), EVEN IF SUCH HOLDER OR OTHER PARTY
+HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+================================================================================
+
+EXPORT CONTROL
+
+This software may be subject to export control laws and regulations. By using
+this software, you agree to comply with all applicable export control laws and
+regulations, including but not limited to the Export Administration Regulations
+(EAR) maintained by the U.S. Department of Commerce.
+
+================================================================================
+
+END OF LICENSE TERMS
