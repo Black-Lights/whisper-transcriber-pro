@@ -1,0 +1,13 @@
+# SHA256 Checksums for Whisper Transcriber Pro v1.2.0
+# Generated: 2025-06-06 23:16:11 UTC
+# 
+# New in v1.2.0:
+# - Live transcription display with real-time preview
+# - Fixed progress bar showing accurate completion percentage
+# - Enhanced performance with 50% faster startup
+# - Better process management and error handling
+# 
+
+316a31d20acdb3fe320410883cb6526942e915b0aeca84b9939c1e82d5e61aa0  whisper-transcriber-pro-v1.2.0-linux.tar.gz
+532a4f7d1095bbde78b1620eabdd9a5e279245396a18b20cc203b348bc1da1fa  whisper-transcriber-pro-v1.2.0-source.zip
+a9f5c31af76fb637c899769dc5393e59d2a4ca6273b986aa807be7929c886723  whisper-transcriber-pro-v1.2.0-windows.zip

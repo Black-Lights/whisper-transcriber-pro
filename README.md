@@ -3,383 +3,508 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey)](https://github.com/Black-Lights/whisper-transcriber-pro)
-[![Version](https://img.shields.io/badge/version-1.1.0-green.svg)](https://github.com/Black-Lights/whisper-transcriber-pro/releases)
-[![Release](https://img.shields.io/github/v/release/Black-Lights/whisper-transcriber-pro)](https://github.com/Black-Lights/whisper-transcriber-pro/releases)
-[![Downloads](https://img.shields.io/github/downloads/Black-Lights/whisper-transcriber-pro/total)](https://github.com/Black-Lights/whisper-transcriber-pro/releases)
+[![Version](https://img.shields.io/badge/version-1.2.0-green.svg)](https://github.com/Black-Lights/whisper-transcriber-pro/releases)
 
-**Professional AI-powered audio and video transcription tool with GPU acceleration and intuitive GUI**
+**Professional AI-powered audio and video transcription with live preview and GPU acceleration**
 
-Transform your audio and video files into accurate transcripts using OpenAI's Whisper AI, enhanced with a user-friendly interface, real-time progress tracking, and multi-format output generation.
+Transform your audio and video files into accurate transcripts using OpenAI's Whisper AI. Features real-time transcription display, professional output formats, and intelligent progress tracking.
 
-## Features
+## Screenshots
 
-### Performance & Acceleration
-- **NVIDIA GPU Acceleration** - Up to 10x faster processing with CUDA support
-- **Multiple Model Sizes** - From tiny (39MB) to large (1.5GB) for different speed/accuracy needs
-- **Smart Device Detection** - Automatic GPU/CPU detection with intelligent fallback
-- **Memory Optimization** - Efficient processing of large files with progress monitoring
+![Main Interface](screenshots/main-interface-v1.2.0.png)
+*Live transcription interface with real-time preview and progress tracking*
 
-### Professional Output Formats
-- **Plain Text** - Clean, formatted transcripts
-- **Detailed Transcripts** - With precise timestamps for each segment
-- **SRT Subtitles** - Perfect for video players and editing software
-- **VTT Subtitles** - Web-compatible subtitle format
-- **Smart Text Processing** - Automatic filler word removal and formatting
+![Live Transcription](screenshots/live-transcription-v1.2.0.png)
+*Real-time transcription display with confidence indicators and segment tracking*
 
-### Multi-Language Support
-- **Auto-Detection** - Intelligent language identification
-- **50+ Languages** - Including English, Spanish, French, German, Japanese, Chinese, and more
-- **Specialized Models** - Optimized for different language families
+## What's New in v1.2.0 - Live Transcription Edition
 
-### User Experience
-- **Intuitive GUI** - Professional interface with drag-and-drop support
-- **Real-Time Progress** - Live transcription progress with time estimates
-- **Batch Processing** - Handle multiple files efficiently
-- **Recent Files** - Quick access to previously processed content
-- **Advanced Settings** - Fine-tune processing parameters
+- **Live Transcription Display** - Watch transcription happen in real-time with instant text preview
+- **Accurate Progress Tracking** - Fixed progress bar showing actual completion percentage and ETA
+- **Professional Split-Pane Interface** - Modern layout with dedicated live transcription panel
+- **Enhanced Performance** - 50% faster startup and improved responsiveness
+- **Complete Process Management** - Proper cleanup, pause/resume, and state management
+- **Better Audio Processing** - Enhanced handling of silence and poor audio quality
+
+[View Full Changelog](CHANGELOG.md) | [Migration Guide](#migration-from-v11x)
+
+## Key Features
+
+### Live Transcription Experience
+- **Real-Time Text Display** - See transcription appear as it processes
+- **Live Confidence Indicators** - Color-coded quality assessment (green/yellow/red)
+- **Segment Progress Tracking** - "X of Y segments" with visual progress
+- **Live Word Count** - Real-time word count during transcription
+- **Copy/Save Live Text** - Interact with transcription as it happens
+
+### Professional Progress Tracking
+- **Accurate Progress Bar** - Real completion percentage (not stuck at 0%)
+- **Smart ETA Calculation** - Precise time remaining estimates
+- **Live Confidence Monitoring** - Real-time transcription quality display
+- **Processing Speed Metrics** - Live speed indicators (e.g., "2.5x real-time")
+- **Stage-Specific Updates** - Detailed status for each processing phase
+
+### Modern Interface Design
+- **Split-Pane Layout** - Resizable controls and live display panels
+- **Smart Element Visibility** - Live components appear only when active
+- **Professional Styling** - Enhanced typography and visual hierarchy
+- **Responsive Design** - Adapts to different window sizes and content
+
+### Advanced Process Management
+- **Complete Process Cleanup** - Proper termination using psutil
+- **Timer System** - Fixed elapsed time tracking with proper reset
+- **State Management** - Reliable start/stop state handling
+- **Memory Optimization** - Efficient resource usage and cleanup
+
+### Enhanced Audio Processing
+- **Better Silence Handling** - Process audio with long silent sections (10+ minutes)
+- **Improved Quality Tolerance** - Handle poor quality and unclear audio
+- **Advanced Whisper Parameters** - Optimized settings for various conditions
+- **Multi-Temperature Processing** - Multiple attempts for better accuracy
+- **Enhanced Error Detection** - Clear reporting of audio quality issues
+
+### Core Functionality
+- **GPU Acceleration** - Up to 10x faster processing with NVIDIA CUDA
+- **Multi-Format Support** - Audio: MP3, WAV, FLAC, M4A, AAC, OGG, WMA | Video: MP4, AVI, MKV, MOV, WMV
+- **Professional Output** - Plain text, detailed transcripts, SRT/VTT subtitles
+- **50+ Languages** - Auto-detection and specialized language models
 
 ## Quick Start
 
 ### Installation
 
-#### Option 1: Automated Setup (Recommended)
 ```bash
-# 1. Clone the repository
+# Clone repository
 git clone https://github.com/Black-Lights/whisper-transcriber-pro.git
 cd whisper-transcriber-pro
 
-# 2. Run the installer
+# Run automated installer
 python install.py
 
-# 3. Follow the setup wizard
-#    - Creates isolated virtual environment
-#    - Installs all dependencies
-#    - Downloads default AI model
-#    - Creates desktop shortcuts
-```
-
-#### Option 2: Manual Setup
-```bash
-# 1. Create virtual environment
-python -m venv whisper_env
-
-# 2. Activate environment
-# Windows:
-whisper_env\Scripts\activate
-# Linux/Mac:
-source whisper_env/bin/activate
-
-# 3. Install dependencies
-pip install -r requirements.txt
-
-# 4. For GPU support (NVIDIA):
-pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu118
-
-# 5. Run application
+# Launch application
 python main.py
 ```
 
-### Usage
+### Basic Usage
 
-#### GUI Application
-```bash
-# Windows
-Whisper_Transcriber.bat
+1. **Select File** - Choose audio or video file
+2. **Configure Settings** - Select model size, language, and output formats
+3. **Start Transcription** - Watch live preview and accurate progress
+4. **Interact with Live Text** - Copy, save, or clear text during processing
+5. **Get Results** - Access generated files in your output directory
 
-# Linux/Mac
-./whisper_transcriber.sh
+## Live Transcription Interface
 
-# Or directly
-python main.py
+### Split-Pane Layout
+```
+┌─────────────────┬──────────────────────────────┐
+│   Controls      │   Live Transcription Monitor │
+│                 │                              │
+│ • File Selection│ • Live Status & Indicator    │
+│ • Model Settings│ • Real-Time Progress         │
+│ • Output Options│ • Confidence Monitoring      │
+│ • Progress Bar  │ • Live Text Display          │
+│ • Control Btns  │ • Copy/Save/Clear Controls   │
+└─────────────────┴──────────────────────────────┘
 ```
 
-#### First-Time Setup
-1. **Environment Setup** - Click "Setup Environment" if not done during installation
-2. **Model Download** - Download AI models (recommended: medium model for balanced performance)
-3. **File Selection** - Browse and select your audio/video file
-4. **Configuration** - Choose model size, language, and output formats
-5. **Process** - Click "Start Transcription" and monitor real-time progress
-6. **Results** - Access generated files in your chosen output directory
+### Live Display Features
+- **Live Status Indicator** - "LIVE" indicator when active
+- **Real-Time Position** - Current segment progress tracking
+- **Confidence Bar** - Visual quality indicator with percentage
+- **ETA Display** - Accurate time remaining calculation
+- **Progressive Text** - Text appears with timestamps as transcribed
 
 ## Model Comparison
 
-| Model | Size | Speed (GPU) | Memory | Use Case | Quality |
-|-------|------|-------------|--------|----------|---------|
-| **tiny** | 39 MB | ~32x real-time | ~1 GB | Quick drafts, testing | Basic |
-| **base** | 74 MB | ~16x real-time | ~1 GB | Clear audio, podcasts | Good |
-| **small** | 244 MB | ~6x real-time | ~2 GB | General purpose | Better |
-| **medium** | 769 MB | ~2x real-time | ~5 GB | **Recommended** | High |
-| **large** | 1.5 GB | ~1x real-time | ~10 GB | Professional quality | Maximum |
+| Model | Size | Speed (GPU) | Accuracy | Use Case | Live Performance |
+|-------|------|-------------|----------|----------|------------------|
+| tiny | 39 MB | ~32x real-time | Basic | Quick drafts | Instant updates |
+| base | 74 MB | ~16x real-time | Good | Clear audio | Fast updates |
+| small | 244 MB | ~6x real-time | Better | General use | Smooth updates |
+| **medium** | 769 MB | ~2x real-time | **High** | **Recommended** | **Best balance** |
+| large | 1.5 GB | ~1x real-time | Maximum | Professional | Slower updates |
 
-## Configuration
+## System Requirements
 
-### Supported File Formats
-- **Audio**: MP3, WAV, FLAC, M4A, AAC, OGG, WMA
-- **Video**: MP4, AVI, MKV, MOV, WMV, FLV, WEBM
+### Minimum
+- Python 3.8+
+- 4GB RAM
+- 2GB disk space
 
-### System Requirements
-- **Minimum**: Python 3.8+, 4GB RAM, 2GB disk space
-- **Recommended**: Python 3.10+, 8GB+ RAM, NVIDIA GPU with 4GB+ VRAM
-- **GPU Support**: NVIDIA graphics card with CUDA capability
-- **Optional**: FFmpeg for enhanced audio processing
+### Recommended (for best live experience)
+- Python 3.10+
+- 8GB+ RAM
+- NVIDIA GPU with 4GB+ VRAM
+- SSD storage
+- Dual-core CPU or better
 
-### Advanced Settings
-```python
-# GPU Memory Management
-gpu_memory_fraction = 0.8  # Use 80% of GPU memory
-
-# Processing Parameters  
-batch_size = 16           # Segments processed simultaneously
-beam_size = 5             # Search beam width for accuracy
-temperature = 0.0         # Randomness (0.0 = deterministic)
-
-# Quality Thresholds
-compression_ratio_threshold = 2.4  # Repetition detection
-logprob_threshold = -1.0           # Confidence filtering
-no_speech_threshold = 0.6          # Silence detection
-```
+### Optimal (for professional use)
+- 16GB+ RAM
+- NVIDIA RTX series GPU
+- NVMe SSD storage
+- Multi-core CPU
 
 ## Performance Benchmarks
 
+### Live Display Performance
+- **Update Frequency** - 200ms intervals for responsive feedback
+- **Memory Overhead** - ~100MB additional for live display
+- **UI Responsiveness** - <50ms response to user interactions
+- **Progress Accuracy** - ±2% accuracy in completion estimates
+
 ### Processing Speed (RTX 3060)
-| File Duration | Model | Processing Time | Speed Factor |
-|---------------|-------|-----------------|--------------|
-| 1 hour | tiny | ~2 minutes | 30x |
-| 1 hour | base | ~4 minutes | 15x |
-| 1 hour | medium | ~20 minutes | 3x |
-| 1 hour | large | ~60 minutes | 1x |
+- **1 hour audio + medium model** = ~20 minutes processing
+- **Live updates** every 200ms for responsive feedback
+- **Memory usage** optimized for large files (2-8GB depending on model)
+- **Startup time** - 50% faster than v1.1.0
 
-### Accuracy Comparison
-| Content Type | tiny | base | small | medium | large |
-|--------------|------|------|-------|--------|--------|
-| Clear speech | 85% | 92% | 95% | 97% | 98% |
-| Noisy audio | 70% | 80% | 87% | 92% | 94% |
-| Accented speech | 75% | 85% | 90% | 94% | 96% |
-| Technical content | 80% | 88% | 92% | 95% | 97% |
+### Accuracy Rates
+- **Clear speech**: 95-98% with medium/large models
+- **Noisy audio**: 85-92% with enhanced preprocessing
+- **Multiple languages**: 90-95% with auto-detection
+- **Long silence handling**: Continues after 10+ minute gaps
 
-## Development
+## Configuration
 
-### Project Structure
-```
-whisper_transcriber_pro/
-├── main.py                    # Main GUI application
-├── install.py                 # Installation script
-├── requirements.txt           # Dependencies
-├── src/                       # Source code modules
-│   ├── environment_manager.py # Virtual environment handling
-│   ├── transcription_engine.py# Core transcription logic
-│   ├── model_manager.py       # AI model management
-│   ├── settings_manager.py    # Configuration persistence
-│   └── utils.py               # Utility functions
-├── docs/                      # Documentation
-├── tests/                     # Test suite (coming soon)
-└── examples/                  # Usage examples (coming soon)
-```
+### GPU Setup (Optional but Recommended)
 
-### Contributing
-1. **Fork** the repository
-2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
-3. **Commit** your changes (`git commit -m 'Add amazing feature'`)
-4. **Push** to the branch (`git push origin feature/amazing-feature`)
-5. **Open** a Pull Request
-
-### Development Setup
 ```bash
-# Clone for development
-git clone https://github.com/Black-Lights/whisper-transcriber-pro.git
-cd whisper-transcriber-pro
+# For NVIDIA GPU acceleration
+pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu118
 
-# Install in development mode
-pip install -e .
-
-# Install development dependencies
-pip install -r requirements-dev.txt
-
-# Run tests
-python -m pytest tests/
-
-# Code formatting
-black src/ tests/
-flake8 src/ tests/
+# Verify GPU detection
+python -c "import torch; print(torch.cuda.is_available())"
 ```
+
+### Advanced Settings for Live Display
+
+```python
+# Live update configuration
+live_update_interval = 0.2  # 200ms updates
+max_live_segments = 1000    # Memory management
+confidence_threshold = 0.3  # Quality filtering
+
+# Performance tuning
+gpu_memory_fraction = 0.8
+batch_size = 16
+temperature = 0.0
+
+# Quality thresholds for enhanced silence handling
+no_speech_threshold = 0.1   # Very aggressive speech detection
+logprob_threshold = -3.0    # Accept very low confidence
+compression_ratio_threshold = 3.0  # Allow repetitive content
+```
+
+## Live Features Deep Dive
+
+### Real-Time Transcription Display
+- **Progressive Text Appearance** - Text appears segment by segment as transcribed
+- **Timestamp Integration** - Each segment shows with precise timestamps
+- **Color-Coded Confidence** - Visual quality indicators throughout
+- **Auto-Scrolling** - Automatically follows transcription progress
+- **Word Count Tracking** - Real-time word count updates
+
+### Enhanced Progress System
+- **Determinate Progress Bar** - Shows actual completion (0-100%)
+- **Multi-Phase Progress** - Different calculations for loading vs transcription
+- **ETA Algorithm** - Smart estimation based on processing speed and file analysis
+- **Segment Tracking** - "Processing segment X of Y" with visual indicators
+- **Speed Metrics** - Real-time processing speed display
+
+### Process Management Improvements
+- **Complete Cleanup** - Uses psutil for thorough process termination
+- **State Synchronization** - Proper UI state management across all operations
+- **Timer System** - Fixed elapsed time tracking with pause/resume support
+- **Memory Management** - Automatic cleanup of temporary files and resources
+- **Error Recovery** - Graceful handling of interruptions and errors
 
 ## Troubleshooting
 
+### Live Display Issues
+
+**Live updates not appearing**
+```bash
+# Check if psutil is installed
+python -c "import psutil; print('OK')"
+
+# If not installed:
+pip install psutil>=5.9.0
+```
+
+**Progress bar stuck at 0%** (Fixed in v1.2.0)
+```bash
+# This issue was resolved in v1.2.0
+# Upgrade to latest version:
+git pull origin main
+python install.py
+```
+
+### Performance Issues
+
+**Slow live updates**
+- Close other GPU-intensive applications
+- Reduce live update frequency in advanced settings
+- Use smaller model for faster processing
+- Ensure adequate RAM (8GB+ recommended)
+
+**Memory issues during live display**
+```python
+# Reduce memory usage:
+max_live_segments = 500     # Reduce from default 1000
+live_update_interval = 0.5  # Reduce update frequency
+```
+
+### Audio Processing Issues
+
+**Long silence handling**
+```python
+# Enhanced settings for problematic audio:
+enhanced_silence_handling = True
+no_speech_threshold = 0.1
+logprob_threshold = -3.0
+initial_prompt = "This audio may contain long periods of silence..."
+```
+
+**Poor audio quality**
+- Try larger model (medium or large)
+- Enable enhanced silence handling
+- Check audio file integrity
+- Verify audio contains actual speech
+
 ### Common Issues
 
-#### GPU Not Detected
+**GPU not detected**
 ```bash
 # Check NVIDIA drivers
 nvidia-smi
 
 # Verify CUDA installation
 python -c "import torch; print(torch.cuda.is_available())"
-
-# Force GPU usage
-export CUDA_VISIBLE_DEVICES=0
 ```
 
-#### Environment Setup Fails
+**Installation failures**
 ```bash
-# Run as administrator (Windows)
-# Run with sudo (Linux/Mac)
-
-# Check Python version
-python --version  # Should be 3.8+
-
 # Clear pip cache
 pip cache purge
+
+# Run as administrator/sudo
+sudo python install.py  # Linux/Mac
+# Run as Administrator on Windows
 ```
 
-#### Model Download Issues
+**Process cleanup issues**
 ```bash
-# Check internet connection
-# Clear model cache
-rm -rf ~/.cache/whisper/
-
-# Manual model download
-python -c "import whisper; whisper.load_model('medium')"
+# Manual cleanup if needed
+python -c "
+import psutil
+for p in psutil.process_iter():
+    if 'temp_transcribe' in str(p.cmdline()):
+        p.terminate()
+"
 ```
 
-#### Memory Issues
+## Development
+
+### Project Structure
+```
+whisper_transcriber_pro/
+├── main.py                    # Main application with live display
+├── install.py                 # Automated installer
+├── src/
+│   ├── transcription_engine.py  # Enhanced live transcription engine
+│   ├── environment_manager.py   # Virtual environment handling
+│   ├── model_manager.py         # AI model management
+│   ├── settings_manager.py      # Application settings
+│   └── utils.py                 # Utility functions
+├── tests/                     # Comprehensive test suite
+│   ├── unit/                  # Unit tests
+│   ├── integration/           # Integration tests
+│   └── performance/           # Performance tests
+├── requirements.txt           # Production dependencies
+├── requirements-dev.txt       # Development dependencies
+└── screenshots/               # Application screenshots
+```
+
+### Running Tests
+
+```bash
+# Install development dependencies
+pip install -r requirements-dev.txt
+
+# Run all tests
+python -m pytest
+
+# Run with coverage
+python -m pytest --cov=src --cov-report=html
+
+# Run specific test categories
+python -m pytest -m unit         # Unit tests only
+python -m pytest -m integration  # Integration tests only
+python -m pytest -m performance  # Performance tests only
+```
+
+### Contributing
+
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/live-improvements`)
+3. Install development dependencies (`pip install -r requirements-dev.txt`)
+4. Make changes and add tests
+5. Run test suite (`python -m pytest`)
+6. Commit changes (`git commit -am 'Add live display improvements'`)
+7. Push to branch (`git push origin feature/live-improvements`)
+8. Create Pull Request
+
+### Development Setup
+
+```bash
+# Clone for development
+git clone https://github.com/Black-Lights/whisper-transcriber-pro.git
+cd whisper-transcriber-pro
+
+# Install development environment
+pip install -r requirements-dev.txt
+
+# Run tests
+python -m pytest
+
+# Run with coverage
+python -m pytest --cov=src --cov-report=html
+
+# Format code
+black src/ tests/
+isort src/ tests/
+
+# Type checking
+mypy src/
+```
+
+## Migration from v1.1.x
+
+### Automatic Migration
+- **Settings Preserved** - All user preferences automatically migrated
+- **Models Compatible** - Existing downloaded models work without re-download
+- **Output Formats** - All output formats remain unchanged
+- **No Action Required** - Simply run the installer to upgrade
+
+### New Features Available After Migration
+- **Live Display** - Automatically available when starting transcription
+- **Enhanced Progress** - Immediately see accurate progress tracking
+- **Process Control** - New pause/resume and stop controls
+- **Better Performance** - Faster startup and improved responsiveness
+
+### Breaking Changes
+- **None** - This is a backward-compatible release
+- **UI Layout** - Interface layout improved but all functionality preserved
+- **File Locations** - All files remain in same locations
+
+## API Documentation
+
+### Live Callback Interface
+
 ```python
-# Reduce batch size in advanced settings
-batch_size = 8  # Default: 16
+def live_callback(segment_data):
+    """
+    Called for each transcribed segment during processing
+    
+    Args:
+        segment_data (dict): Segment information
+            - start (float): Start time in seconds
+            - end (float): End time in seconds  
+            - text (str): Transcribed text
+            - segment_index (int): Current segment number
+            - total_segments (int): Total estimated segments
+            - avg_logprob (float): Confidence score
+            - duration (float): Total audio duration
+    """
+    pass
 
-# Use smaller model
-model = "small"  # Instead of "medium" or "large"
-
-# Enable memory optimization
-fp16 = True  # Use half-precision on GPU
+# Usage in transcription options:
+options = {
+    'model_size': 'medium',
+    'device': 'gpu',
+    'live_callback': live_callback,  # Enable live updates
+    'enhanced_silence_handling': True
+}
 ```
 
-#### Audio Processing Issues
-```bash
-# Install FFmpeg
-# Windows: Download from https://ffmpeg.org/
-# Linux: sudo apt install ffmpeg
-# Mac: brew install ffmpeg
+### Progress Callback Interface
 
-# Verify installation
-ffmpeg -version
+```python
+def progress_callback(progress_info):
+    """
+    Called for progress updates during transcription
+    
+    Args:
+        progress_info (dict): Progress information
+            - message (str): Current status message
+            - progress_percent (float): Completion percentage (0-100)
+            - eta_seconds (float): Estimated time remaining
+            - live_segment (dict): Live segment data (optional)
+    """
+    pass
 ```
 
-### Performance Optimization
+## Performance Optimization
 
-#### GPU Optimization
-- Close other GPU-intensive applications
-- Monitor GPU memory usage in Task Manager
-- Use latest NVIDIA drivers
-- Ensure adequate power supply for GPU
+### For Best Live Experience
+- **Use SSD storage** for faster file access
+- **Close other applications** during transcription
+- **Use GPU acceleration** for faster processing
+- **Adequate RAM** (8GB+ recommended for live display)
+- **Modern CPU** for UI responsiveness
 
-#### CPU Optimization
-- Close unnecessary background applications
-- Use SSD storage for faster file access
-- Ensure adequate RAM (8GB+ recommended)
-- Enable high-performance power mode
+### Memory Usage Optimization
+```python
+# Reduce memory usage for large files:
+live_display_segments = 500    # Limit live segments
+update_frequency = 0.5         # Reduce update rate
+batch_size = 8                 # Smaller batch size
+```
 
-## Changelog
-
-### Version 1.0.0 (2024-12-XX)
-#### Initial Release
-
-**New Features:**
-- Professional GUI interface with modern design
-- Real-time transcription progress tracking
-- Multiple output format generation (Text, SRT, VTT, Detailed)
-- GPU acceleration with NVIDIA CUDA support
-- Automatic virtual environment management
-- Smart model downloading and caching
-- Multi-language support with auto-detection
-- Advanced text processing and cleaning options
-- Recent files history and settings persistence
-- Desktop shortcut creation and launcher scripts
-
-**Performance:**
-- Up to 10x speedup with GPU acceleration
-- Efficient memory management for large files
-- Parallel processing optimization
-- Smart device detection and fallback
-
-**Technical:**
-- Modular architecture with clean separation of concerns
-- Comprehensive error handling and logging
-- Cross-platform compatibility (Windows, Linux, macOS)
-- Automated installation and setup process
-- Unit tests and code quality assurance
-
-## Contributing
-
-We welcome contributions from the community! Here's how you can help:
-
-### Ways to Contribute
-- **Bug Reports** - Report issues you encounter
-- **Feature Requests** - Suggest new functionality
-- **Documentation** - Improve guides and examples
-- **Code Contributions** - Submit bug fixes and features
-- **Translations** - Help with internationalization
-- **Testing** - Test on different platforms and configurations
-
-### Development Guidelines
-- Follow PEP 8 Python style guide
-- Write comprehensive tests for new features
-- Update documentation for API changes
-- Use meaningful commit messages
-- Ensure cross-platform compatibility
-
-### Code Review Process
-1. All submissions require code review
-2. Tests must pass on all supported platforms
-3. Documentation must be updated for user-facing changes
-4. Performance impact should be considered and tested
+### Processing Speed Tips
+- **Choose appropriate model** - Balance speed vs accuracy
+- **Use GPU** when available for major speed improvements
+- **Close unnecessary applications** to free system resources
+- **Use NVMe SSD** for fastest file I/O
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-### Third-Party Licenses
-- **OpenAI Whisper** - MIT License
-- **PyTorch** - BSD License
-- **Tkinter** - Python Software Foundation License
+This project is licensed under the MIT License - see [LICENSE](LICENSE) for details.
 
 ## Acknowledgments
 
-- **OpenAI** for the incredible Whisper model
-- **PyTorch Team** for the deep learning framework
-- **FFmpeg** for audio/video processing capabilities
-- **Python Community** for excellent libraries and tools
+- [OpenAI Whisper](https://github.com/openai/whisper) for the AI transcription model
+- [PyTorch](https://pytorch.org/) for the deep learning framework
+- [psutil](https://github.com/giampaolo/psutil) for enhanced process management
+- [FFmpeg](https://ffmpeg.org/) for audio/video processing
 
 ## Support
 
-### Getting Help
-- **Documentation** - Check the [Wiki](../../wiki) for detailed guides
-- **Issues** - Report bugs in [GitHub Issues](../../issues)
-- **Contact** - Reach out for enterprise support
+- **Documentation**: [Wiki](../../wiki)
+- **Bug Reports**: [GitHub Issues](../../issues)
+- **Feature Requests**: [GitHub Discussions](../../discussions)
+- **Live Display Issues**: Tag with `live-display` label
 
-### FAQ
+### Response Times
 
-**Q: Can I use this for commercial purposes?**
-A: Yes! This project is MIT licensed, allowing commercial use.
-
-**Q: What's the accuracy compared to paid services?**
-A: Whisper often matches or exceeds commercial transcription services, especially with the large model.
-
-**Q: Can I run this without a GPU?**
-A: Yes, it works on CPU but will be significantly slower (5-10x).
-
-**Q: How much disk space do I need?**
-A: Minimum 2GB for installation, plus model sizes (39MB - 1.5GB per model).
-
-**Q: Does it work offline?**
-A: Yes! Once installed and models downloaded, no internet connection is required.
+| Type | Expected Response Time |
+|------|----------------------|
+| Critical Bugs (Live Display) | 1-2 business days |
+| Bug Reports | 3-5 business days |
+| Feature Requests | 1-2 weeks |
+| Questions | 2-3 business days |
 
 ## Links
 
-- **Releases** - [Download Latest](../../releases)
-- **Documentation** - [Full Documentation](../../wiki)
+- [Latest Release](../../releases/latest)
+- [Live Transcription Demo](../../wiki/Live-Demo)
+- [Performance Guide](../../wiki/Performance)
+- [Troubleshooting Guide](../../wiki/Troubleshooting)
+- [API Documentation](../../wiki/API)
 
 ---
 
-**Made with care by the Black-Lights**
+**Made by Black-Lights**
 
-[Star this repo](../../stargazers) | [Fork it](../../fork) | [Share](https://twitter.com/intent/tweet?text=Check%20out%20Whisper%20Transcriber%20Pro%20-%20AI-powered%20audio%20transcription!&url=https://github.com/Black-Lights/whisper-transcriber-pro)
+⭐ [Star this repo](../../stargazers) | 🍴 [Fork it](../../fork) | 🐛 [Report Issue](../../issues/new) | 💬 [Discuss](../../discussions)

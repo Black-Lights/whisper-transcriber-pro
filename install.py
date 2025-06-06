@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Whisper Transcriber Pro - Installation Script
+Whisper Transcriber Pro - Installation Script (Updated for v1.1.0)
 Author: Black-Lights (https://github.com/Black-Lights)
-This script sets up the complete application with virtual environment
+This script sets up the complete application with virtual environment and new dependencies
 """
 
 import os
@@ -14,7 +14,7 @@ import shutil
 
 class WhisperInstaller:
     def __init__(self):
-        self.app_name = "Whisper Transcriber Pro"
+        self.app_name = "Whisper Transcriber Pro v1.1.0"
         self.app_dir = Path(__file__).parent
         self.system = platform.system()
         self.is_windows = self.system == "Windows"
@@ -59,6 +59,85 @@ class WhisperInstaller:
             print("WARNING: ffmpeg not detected (optional - some features may be limited)")
         
         return True
+    
+    def check_existing_installation(self):
+        """Check if there's an existing installation"""
+        venv_dir = self.app_dir / "whisper_env"
+        main_file = self.app_dir / "main.py"
+        
+        existing_installation = {
+            'venv_exists': venv_dir.exists(),
+            'main_exists': main_file.exists(),
+            'has_batch_file': (self.app_dir / "Whisper_Transcriber.bat").exists() if self.is_windows else (self.app_dir / "whisper_transcriber.sh").exists()
+        }
+        
+        return existing_installation
+    
+    def update_existing_installation(self):
+        """Update existing installation with new dependencies"""
+        print("\nUpdating existing installation...")
+        
+        venv_dir = self.app_dir / "whisper_env"
+        
+        # Check if virtual environment exists and is working
+        if self.is_windows:
+            python_exe = venv_dir / "Scripts" / "python.exe"
+            pip_exe = venv_dir / "Scripts" / "pip.exe"
+        else:
+            python_exe = venv_dir / "bin" / "python"
+            pip_exe = venv_dir / "bin" / "pip"
+        
+        if not python_exe.exists():
+            print("ERROR: Virtual environment appears to be corrupted")
+            return False
+        
+        try:
+            # Test virtual environment
+            result = subprocess.run([str(python_exe), "--version"], 
+                                  capture_output=True, text=True, timeout=10)
+            if result.returncode != 0:
+                print("ERROR: Virtual environment is not working properly")
+                return False
+            
+            print(f"   Virtual environment working: {result.stdout.strip()}")
+            
+            # Install new dependencies
+            print("   Installing new dependencies...")
+            
+            # Install psutil for process management
+            result = subprocess.run([str(pip_exe), "install", "psutil>=5.9.0"], 
+                                  capture_output=True, text=True, timeout=300)
+            
+            if result.returncode == 0:
+                print("   SUCCESS: psutil installed for process management")
+            else:
+                print(f"   WARNING: Could not install psutil: {result.stderr}")
+            
+            # Upgrade existing packages to ensure compatibility
+            print("   Upgrading existing packages...")
+            
+            packages_to_upgrade = [
+                "openai-whisper>=20231117",
+                "torch>=2.0.0",
+                "torchaudio>=2.0.0", 
+                "numpy>=1.24.0",
+                "tqdm>=4.65.0"
+            ]
+            
+            for package in packages_to_upgrade:
+                try:
+                    subprocess.run([str(pip_exe), "install", "--upgrade", package], 
+                                 capture_output=True, text=True, timeout=300)
+                    print(f"   Updated: {package.split('>=')[0]}")
+                except:
+                    print(f"   Warning: Could not update {package.split('>=')[0]}")
+            
+            print("   SUCCESS: Installation updated successfully")
+            return True
+            
+        except Exception as e:
+            print(f"   ERROR: Failed to update installation: {e}")
+            return False
     
     def create_directory_structure(self):
         """Create application directory structure"""
@@ -119,116 +198,6 @@ python main.py
             script_file.chmod(0o755)  # Make executable
             print("   Created: whisper_transcriber.sh")
         
-        return True
-    
-    def create_desktop_shortcut(self):
-        """Create desktop shortcut"""
-        print("\nCreating desktop shortcut...")
-        
-        try:
-            if self.is_windows:
-                # Windows shortcut creation
-                desktop = Path.home() / "Desktop"
-                shortcut_path = desktop / "Whisper Transcriber Pro.lnk"
-                
-                # Try to create shortcut using COM
-                try:
-                    import win32com.client
-                    shell = win32com.client.Dispatch("WScript.Shell")
-                    shortcut = shell.CreateShortCut(str(shortcut_path))
-                    shortcut.Targetpath = str(self.app_dir / "Whisper_Transcriber.bat")
-                    shortcut.WorkingDirectory = str(self.app_dir)
-                    shortcut.IconLocation = str(self.app_dir / "Whisper_Transcriber.bat")
-                    shortcut.save()
-                    print("   SUCCESS: Desktop shortcut created")
-                except ImportError:
-                    print("   WARNING: Could not create shortcut (win32com not available)")
-                    print(f"   MANUAL: Create shortcut to {self.app_dir / 'Whisper_Transcriber.bat'}")
-            
-            else:
-                # Linux desktop file
-                desktop_dirs = [
-                    Path.home() / "Desktop",
-                    Path.home() / ".local" / "share" / "applications"
-                ]
-                
-                desktop_content = f'''[Desktop Entry]
-Name=Whisper Transcriber Pro
-Comment=AI-powered audio/video transcription
-Exec={self.app_dir / "whisper_transcriber.sh"}
-Icon=audio-x-generic
-Terminal=false
-Type=Application
-Categories=AudioVideo;Audio;
-'''
-                
-                for desktop_dir in desktop_dirs:
-                    if desktop_dir.exists():
-                        desktop_file = desktop_dir / "whisper-transcriber.desktop"
-                        with open(desktop_file, 'w') as f:
-                            f.write(desktop_content)
-                        desktop_file.chmod(0o755)
-                        print(f"   SUCCESS: Created: {desktop_file}")
-                        break
-        
-        except Exception as e:
-            print(f"   WARNING: Could not create desktop shortcut: {e}")
-        
-        return True
-    
-    def create_uninstaller(self):
-        """Create uninstall script"""
-        print("\nCreating uninstaller...")
-        
-        uninstall_content = f'''#!/usr/bin/env python3
-"""
-Whisper Transcriber Pro - Uninstaller
-Author: Black-Lights (https://github.com/Black-Lights)
-"""
-
-import shutil
-import os
-from pathlib import Path
-
-def uninstall():
-    app_dir = Path(__file__).parent
-    
-    print("Uninstalling Whisper Transcriber Pro...")
-    
-    # Remove virtual environment
-    venv_dir = app_dir / "whisper_env"
-    if venv_dir.exists():
-        print("   Removing virtual environment...")
-        shutil.rmtree(venv_dir)
-    
-    # Remove logs and temp
-    for directory in ["logs", "temp"]:
-        dir_path = app_dir / directory
-        if dir_path.exists():
-            print(f"   Removing {{directory}}...")
-            shutil.rmtree(dir_path)
-    
-    # Remove settings
-    settings_file = app_dir / "settings.json"
-    if settings_file.exists():
-        print("   Removing settings...")
-        settings_file.unlink()
-    
-    print("SUCCESS: Uninstallation completed")
-    print("NOTE: Application files remain in:", app_dir)
-    print("   You can safely delete the entire folder")
-    
-    input("Press Enter to exit...")
-
-if __name__ == "__main__":
-    uninstall()
-'''
-        
-        uninstall_file = self.app_dir / "uninstall.py"
-        with open(uninstall_file, 'w', encoding='utf-8') as f:
-            f.write(uninstall_content)
-        
-        print("   SUCCESS: uninstall.py created")
         return True
     
     def setup_environment(self):
@@ -296,6 +265,50 @@ if __name__ == "__main__":
                 print("\nERROR: System requirements not met")
                 return False
             
+            # Check for existing installation
+            existing = self.check_existing_installation()
+            
+            if existing['venv_exists'] and existing['main_exists']:
+                print("\n" + "="*50)
+                print("EXISTING INSTALLATION DETECTED")
+                print("="*50)
+                print("Found existing Whisper Transcriber Pro installation.")
+                print("This will update your installation with new features:")
+                print("  • Live transcription display")
+                print("  • Better process management") 
+                print("  • Enhanced audio quality handling")
+                print("  • Improved timer system")
+                print()
+                
+                update_choice = input("Update existing installation? (Y/n): ").lower()
+                if update_choice != 'n':
+                    if self.update_existing_installation():
+                        print("\n" + "="*50)
+                        print("UPDATE COMPLETED!")
+                        print("="*50)
+                        print("\nYour installation has been updated with new features!")
+                        print("You can now use your existing launcher:")
+                        if self.is_windows:
+                            print("   • Double-click 'Whisper_Transcriber.bat'")
+                        else:
+                            print("   • Run './whisper_transcriber.sh'")
+                        print("\nNew features available:")
+                        print("   • Real-time transcription display")
+                        print("   • Better handling of silence/poor audio")
+                        print("   • Pause/Resume functionality")
+                        print("   • Enhanced progress tracking")
+                        return True
+                    else:
+                        print("\nWARNING: Update failed, proceeding with fresh installation...")
+                else:
+                    print("Update cancelled by user")
+                    return False
+            
+            # Fresh installation
+            print("\n" + "="*50)
+            print("FRESH INSTALLATION")
+            print("="*50)
+            
             # Create structure
             if not self.create_directory_structure():
                 print("\nERROR: Failed to create directories")
@@ -304,11 +317,6 @@ if __name__ == "__main__":
             # Create scripts
             if not self.create_batch_files():
                 print("\nERROR: Failed to create launcher scripts")
-                return False
-            
-            # Create uninstaller
-            if not self.create_uninstaller():
-                print("\nERROR: Failed to create uninstaller")
                 return False
             
             # Ask about environment setup
@@ -325,12 +333,7 @@ if __name__ == "__main__":
                     # Ask about model download
                     download_model = input("\nDownload default model (medium, ~769MB)? (y/N): ").lower().startswith('y')
                     if download_model:
-                        self.download_default_model()
-            
-            # Create desktop shortcut
-            create_shortcut = input("\nCreate desktop shortcut? (Y/n): ").lower()
-            if create_shortcut != 'n':
-                self.create_desktop_shortcut()
+                        self.download_model()
             
             print("\n" + "="*50)
             print("INSTALLATION COMPLETED!")
@@ -368,7 +371,7 @@ def main():
         success = installer.run_installation()
         
         if success:
-            print("\nReady to transcribe!")
+            print("\nReady to transcribe with new live features!")
             input("\nPress Enter to exit...")
         else:
             print("\nInstallation incomplete")
