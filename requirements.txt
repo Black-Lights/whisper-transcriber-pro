@@ -1,19 +1,21 @@
-# Whisper Transcriber Pro - Requirements (Stable Production Versions)
+# Whisper Transcriber Pro - Requirements (Updated)
 # Author: Black-Lights (https://github.com/Black-Lights)
 # Project: Whisper Transcriber Pro v1.2.0
 
 # Install with: pip install -r requirements.txt
 
-# Core dependencies (Stable, well-tested versions)
-openai-whisper>=v20240930
-tqdm>=4.67.1
-numpy>=2.0.2
+# Core dependencies
+openai-whisper>=20231117
+tqdm>=4.65.0
+numpy>=1.24.0
 requests>=2.32.3
-psutil>=7.0.0
 
-# PyTorch (Stable LTS-like versions)
-torch>=2.7.1
-torchaudio>=2.7.1
+# For CPU-only installation (default)
+torch>=2.0.0
+torchaudio>=2.0.0
+
+# Process management and system monitoring
+psutil>=7.0.0
 
 # Audio/Video processing
 ffmpeg-python>=0.2.0
@@ -22,16 +24,16 @@ ffmpeg-python>=0.2.0
 # tkinter (built-in)
 
 # Development dependencies (optional)
-# pytest>=8.4.0
-# black>=25.1.0
-# flake8>=7.2.0
+# pytest>=7.0.0
+# black>=23.0.0
+# flake8>=6.0.0
 
-# GPU Support (CUDA 11.8) - Stable for most hardware
+# GPU Support (CUDA 11.8) - Uncomment for GPU installation
 # --index-url https://download.pytorch.org/whl/cu118
-# torch>=2.7.1+cu118
-# torchaudio>=2.7.1+cu118
+# torch>=2.0.0+cu118
+# torchaudio>=2.0.0+cu118
 
-# GPU Support (CUDA 12.1) - For newer hardware
+# Alternative GPU Support (CUDA 12.1)
 # --index-url https://download.pytorch.org/whl/cu121
-# torch>=2.7.1+cu121
-# torchaudio>=2.7.1+cu121
+# torch>=2.0.0+cu121
+# torchaudio>=2.0.0+cu121
