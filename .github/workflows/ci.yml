@@ -104,20 +104,7 @@ jobs:
         echo "Bandit scan completed"
         if [ -f bandit-report.json ]; then
           echo "Bandit findings summary:"
-          python -c "
-import json
-try:
-    with open('bandit-report.json', 'r') as f:
-        data = json.load(f)
-        results = data.get('results', [])
-        print(f'Total issues found: {len(results)}')
-        for severity in ['HIGH', 'MEDIUM', 'LOW']:
-            count = len([r for r in results if r.get('issue_severity') == severity])
-            if count > 0:
-                print(f'{severity}: {count}')
-except Exception as e:
-    print(f'Could not parse bandit report: {e}')
-"
+          python -c "import json; data=json.load(open('bandit-report.json')); results=data.get('results',[]); print(f'Total: {len(results)}'); [print(f'{s}: {len([r for r in results if r.get(\"issue_severity\")==s])}') for s in ['HIGH','MEDIUM','LOW'] if len([r for r in results if r.get(\"issue_severity\")==s])>0]" 2>/dev/null || echo "Could not parse bandit report"
         fi
     
     - name: Upload security reports
