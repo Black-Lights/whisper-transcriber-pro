@@ -339,7 +339,7 @@ class EnvironmentManager:
     def run_pip_command(self, args):
         """Run pip command in virtual environment with improved error handling"""
         cmd = [str(self.pip_exe)] + args
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=3600)
 
         # Handle pip upgrade notices and errors more gracefully
         if result.returncode != 0:
@@ -368,14 +368,14 @@ class EnvironmentManager:
                         "pip",
                     ]
                     upgrade_result = subprocess.run(
-                        upgrade_cmd, capture_output=True, text=True, timeout=300
+                        upgrade_cmd, capture_output=True, text=True, timeout=600
                     )
 
                     if upgrade_result.returncode == 0:
                         print("Pip upgraded successfully, retrying original command...")
                         # Retry the original command
                         retry_result = subprocess.run(
-                            cmd, capture_output=True, text=True, timeout=600
+                            cmd, capture_output=True, text=True, timeout=1200
                         )
                         if retry_result.returncode == 0:
                             return retry_result
