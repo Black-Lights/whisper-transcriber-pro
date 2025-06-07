@@ -236,7 +236,7 @@ celerybeat.pid
 # PyCharm specific
 .idea/
 
-# VS Code specific  
+# VS Code specific
 .vscode/settings.json
 .vscode/tasks.json
 .vscode/launch.json
@@ -335,3 +335,7 @@ custom_tools/
 !CONTRIBUTING.md
 !docs/
 !docs/**/*.md
+
+# Custom files
+5.9.0
+transcription_engine_backup_librosa_slow.py

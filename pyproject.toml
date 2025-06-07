@@ -1,0 +1,120 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+# Tool configurations (let setup.py handle package metadata)
+[tool.black]
+line-length = 88
+target-version = ['py38', 'py39', 'py310', 'py311']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+  | screenshots
+  | temp
+  | logs
+  | models
+  | releases
+)/
+'''
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 88
+known_first_party = ["src"]
+known_third_party = ["whisper", "torch", "tkinter", "psutil", "numpy"]
+
+[tool.flake8]
+max-line-length = 88
+extend-ignore = [
+    "E203",  # whitespace before ':'
+    "W503",  # line break before binary operator
+    "E501",  # line too long (handled by black)
+]
+exclude = [
+    ".git",
+    "__pycache__",
+    "build",
+    "dist",
+    ".venv",
+    "venv",
+    "screenshots",
+    "temp",
+    "logs",
+    "models",
+    "releases",
+    "*.egg-info",
+]
+per-file-ignores = [
+    "__init__.py:F401",
+    "main.py:E402",
+]
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+disallow_untyped_defs = false
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = [
+    "-ra",
+    "-q",
+    "--strict-markers",
+    "--strict-config",
+    "--cov=src",
+    "--cov=main",
+    "--cov-report=term-missing",
+    "--cov-report=xml",
+]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+markers = [
+    "unit: Unit tests",
+    "integration: Integration tests", 
+    "performance: Performance tests",
+    "gpu: Tests requiring GPU",
+    "slow: Slow running tests",
+]
+
+[tool.coverage.run]
+source = ["src", "main.py"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "screenshots/*",
+    "temp/*",
+    "logs/*",
+    "models/*",
+    "releases/*",
+    "install.py",
+    "setup.py",
+    "create_release.py",
+    "uninstall.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if __name__ == .__main__.:",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if TYPE_CHECKING:",
+]
+show_missing = true
+
+[tool.bandit]
+exclude_dirs = ["tests", "screenshots", "temp", "logs", "models", "releases"]
+skips = ["B101", "B603"]

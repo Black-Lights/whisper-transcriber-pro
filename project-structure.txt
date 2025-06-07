@@ -1,0 +1,55 @@
+transcribe_app
+├── 5.9.0
+├── CHANGELOG.md
+├── CONTRIBUTING.md
+├── LICENSE
+├── Makefile
+├── RASD.md
+├── README.md
+├── Setup.bat
+├── Whisper_Transcriber.bat
+├── create_release.py
+├── install.py
+├── logs
+├── main.py
+├── models
+├── project-structure.txt
+├── pyproject.toml
+├── pytest.ini
+├── releases
+│   ├── SHA256SUMS-v1.1.0.txt
+│   ├── SHA256SUMS-v1.2.0.txt
+│   ├── whisper-transcriber-pro-v1.1.0-linux.tar.gz
+│   ├── whisper-transcriber-pro-v1.1.0-source.zip
+│   ├── whisper-transcriber-pro-v1.1.0-windows.zip
+│   ├── whisper-transcriber-pro-v1.2.0-linux.tar.gz
+│   ├── whisper-transcriber-pro-v1.2.0-source.zip
+│   └── whisper-transcriber-pro-v1.2.0-windows.zip
+├── requirements-dev.txt
+├── requirements.txt
+├── screenshots
+│   ├── live-transcription-v1.2.0.png
+│   └── main-interface-v1.2.0.png
+├── setup.py
+├── src
+│   ├── environment_manager.py
+│   ├── model_manager.py
+│   ├── settings_manager.py
+│   ├── transcription_engine.py
+│   ├── transcription_engine_backup_librosa_slow.py
+│   └── utils.py
+├── temp
+├── tests
+│   ├── conftest.py
+│   ├── integration
+│   │   └── test_workflow.py
+│   ├── performance
+│   │   └── test_performance.py
+│   ├── test_all_in_one.py
+│   └── unit
+│       ├── test_environment_manager.py
+│       ├── test_model_manager.py
+│       ├── test_transcription_engine.py
+│       └── test_utils.py
+├── tox.ini
+├── uninstall.py

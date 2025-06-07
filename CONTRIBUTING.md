@@ -59,13 +59,13 @@ Before you begin, ensure you have:
    ```bash
    # Create virtual environment
    python -m venv dev_env
-   
+
    # Activate environment
    # Windows:
    dev_env\Scripts\activate
    # Linux/Mac:
    source dev_env/bin/activate
-   
+
    # Install development dependencies
    pip install -r requirements-dev.txt
    ```
@@ -180,10 +180,10 @@ Add any other context, mockups, or examples here.
    ```bash
    # Run all tests
    python -m pytest tests/
-   
+
    # Run specific test file
    python -m pytest tests/test_specific_module.py
-   
+
    # Run with coverage
    python -m pytest --cov=src tests/
    ```
@@ -286,17 +286,17 @@ We follow **PEP 8** with some project-specific conventions:
 # Good
 class TranscriptionEngine:
     """Handles audio transcription using Whisper models."""
-    
+
     def __init__(self, model_size: str = "medium"):
         self.model_size = model_size
         self._model = None
-    
+
     def transcribe(self, audio_path: str) -> dict:
         """Transcribe audio file to text.
-        
+
         Args:
             audio_path: Path to the audio file
-            
+
         Returns:
             Dictionary containing transcription results
         """
@@ -360,25 +360,25 @@ We use **Google Style** docstrings:
 ```python
 def transcribe_audio(file_path: str, model_size: str = "medium") -> dict:
     """Transcribe audio file using Whisper model.
-    
+
     This function processes an audio file and returns a transcription
     with timestamps and confidence scores.
-    
+
     Args:
         file_path: Path to the audio file to transcribe.
         model_size: Size of the Whisper model to use. Options are
             'tiny', 'base', 'small', 'medium', 'large'.
-    
+
     Returns:
         A dictionary containing:
             - text: The transcribed text
             - segments: List of segments with timestamps
             - language: Detected language
-    
+
     Raises:
         FileNotFoundError: If the audio file doesn't exist.
         ValueError: If the model_size is invalid.
-    
+
     Example:
         >>> result = transcribe_audio("speech.mp3", "medium")
         >>> print(result["text"])
@@ -414,28 +414,28 @@ from src.transcription_engine import TranscriptionEngine
 
 class TestTranscriptionEngine:
     """Test cases for TranscriptionEngine."""
-    
+
     @pytest.fixture
     def engine(self):
         """Create a TranscriptionEngine instance for testing."""
         return TranscriptionEngine(model_size="tiny")
-    
+
     def test_initialization(self, engine):
         """Test engine initialization."""
         assert engine.model_size == "tiny"
         assert engine._model is None
-    
+
     @patch('src.transcription_engine.whisper.load_model')
     def test_model_loading(self, mock_load_model, engine):
         """Test model loading functionality."""
         mock_model = Mock()
         mock_load_model.return_value = mock_model
-        
+
         engine.load_model()
-        
+
         mock_load_model.assert_called_once_with("tiny")
         assert engine._model == mock_model
-    
+
     def test_invalid_model_size(self):
         """Test initialization with invalid model size."""
         with pytest.raises(ValueError, match="Invalid model size"):
@@ -597,7 +597,7 @@ Thank you for your interest in contributing to Whisper Transcriber Pro! Every co
 
 **Remember:**
 - Every expert was once a beginner
-- We're here to help you succeed  
+- We're here to help you succeed
 - Your unique perspective adds value
 - Great things are built by great communities
 
