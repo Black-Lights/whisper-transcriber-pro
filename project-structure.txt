@@ -14,12 +14,17 @@ transcribe_app
 ├── main.py
 ├── models
 ├── project-structure.txt
+├── pyproject.toml
 ├── pytest.ini
 ├── releases
 │   ├── SHA256SUMS-v1.1.0.txt
+│   ├── SHA256SUMS-v1.2.0.txt
 │   ├── whisper-transcriber-pro-v1.1.0-linux.tar.gz
 │   ├── whisper-transcriber-pro-v1.1.0-source.zip
-│   └── whisper-transcriber-pro-v1.1.0-windows.zip
+│   ├── whisper-transcriber-pro-v1.1.0-windows.zip
+│   ├── whisper-transcriber-pro-v1.2.0-linux.tar.gz
+│   ├── whisper-transcriber-pro-v1.2.0-source.zip
+│   └── whisper-transcriber-pro-v1.2.0-windows.zip
 ├── requirements-dev.txt
 ├── requirements.txt
 ├── screenshots

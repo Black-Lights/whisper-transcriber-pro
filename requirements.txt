@@ -33,6 +33,6 @@ ffmpeg-python>=0.2.0
 # torchaudio>=2.0.0+cu118
 
 # Alternative GPU Support (CUDA 12.1)
-# --index-url https://download.pytorch.org/whl/cu121  
+# --index-url https://download.pytorch.org/whl/cu121
 # torch>=2.0.0+cu121
 # torchaudio>=2.0.0+cu121

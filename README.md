@@ -406,11 +406,11 @@ mypy src/
 def live_callback(segment_data):
     """
     Called for each transcribed segment during processing
-    
+
     Args:
         segment_data (dict): Segment information
             - start (float): Start time in seconds
-            - end (float): End time in seconds  
+            - end (float): End time in seconds
             - text (str): Transcribed text
             - segment_index (int): Current segment number
             - total_segments (int): Total estimated segments
@@ -434,7 +434,7 @@ options = {
 def progress_callback(progress_info):
     """
     Called for progress updates during transcription
-    
+
     Args:
         progress_info (dict): Progress information
             - message (str): Current status message

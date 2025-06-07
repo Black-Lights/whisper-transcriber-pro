@@ -323,7 +323,7 @@ The first stable release of Whisper Transcriber Pro, providing a comprehensive d
 
 #### Processing Speed (with RTX 3060)
 - **Tiny Model**: ~30x real-time transcription speed
-- **Base Model**: ~15x real-time transcription speed  
+- **Base Model**: ~15x real-time transcription speed
 - **Small Model**: ~6x real-time transcription speed
 - **Medium Model**: ~3x real-time transcription speed
 - **Large Model**: ~1x real-time transcription speed
@@ -482,7 +482,7 @@ For future releases, the following template will be used:
 ### Added
 - New features and capabilities
 
-### Changed  
+### Changed
 - Modifications to existing functionality
 
 ### Deprecated

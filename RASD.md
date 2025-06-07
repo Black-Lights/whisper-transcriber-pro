@@ -301,7 +301,7 @@ The system follows a modular architecture with clear separation of concerns:
 ### 5.3 Data Flow
 
 ```
-Input File → Validation → Audio Extraction → Model Loading → 
+Input File → Validation → Audio Extraction → Model Loading →
 Transcription → Post-Processing → Output Generation → File Saving
 ```
 

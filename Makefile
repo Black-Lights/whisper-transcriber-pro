@@ -256,7 +256,7 @@ help-test:
 	@echo "Testing Commands:"
 	@echo "  make test             - Run all tests with coverage"
 	@echo "  make test-unit        - Run only unit tests"
-	@echo "  make test-integration - Run only integration tests" 
+	@echo "  make test-integration - Run only integration tests"
 	@echo "  make test-performance - Run only performance tests"
 	@echo "  make test-coverage    - Run tests with coverage requirements"
 

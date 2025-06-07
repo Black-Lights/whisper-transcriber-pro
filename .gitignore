@@ -236,7 +236,7 @@ celerybeat.pid
 # PyCharm specific
 .idea/
 
-# VS Code specific  
+# VS Code specific
 .vscode/settings.json
 .vscode/tasks.json
 .vscode/launch.json
