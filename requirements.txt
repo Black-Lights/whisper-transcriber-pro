@@ -7,7 +7,7 @@
 # Core dependencies (Stable, well-tested versions)
 openai-whisper>=v20240930
 tqdm>=4.67.1
-numpy>=2.2.6
+numpy>=2.0.2
 requests>=2.32.3
 psutil>=7.0.0
 
