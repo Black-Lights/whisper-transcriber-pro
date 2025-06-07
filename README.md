@@ -85,6 +85,36 @@ python install.py
 python main.py
 ```
 
+### Installation Note
+
+**The initial setup will take some time** as it downloads:
+- PyTorch with CUDA support (~2-3 GB)
+- Whisper AI models (~1-2 GB)
+- Additional dependencies
+
+**Total download size: ~3-4 GB**  
+Installation time depends on your internet speed (typically 10-20 minutes).
+
+
+### Alternative Installation
+
+If you prefer manual installation:
+
+```bash
+# Create and activate virtual environment (recommended)
+python -m venv whisper-env
+source whisper-env/bin/activate  # On Windows: whisper-env\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run application
+python main.py
+```
+
+**Note:** Always use a virtual environment to avoid dependency conflicts.  
+The application will automatically download required models on first run.
+
 ### Basic Usage
 
 1. **Select File** - Choose audio or video file
