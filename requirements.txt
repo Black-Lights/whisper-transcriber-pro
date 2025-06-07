@@ -12,6 +12,7 @@ requests>=2.32.3
 psutil>=7.0.0
 
 # PyTorch (Stable LTS-like versions)
+# Note: The installer will automatically choose GPU or CPU version
 torch>=2.7.1
 torchaudio>=2.7.1
 
@@ -21,17 +22,11 @@ ffmpeg-python>=0.2.0
 # GUI dependencies (included with Python)
 # tkinter (built-in)
 
-# Development dependencies (optional)
+# Development dependencies (optional - uncomment if needed)
 # pytest>=8.4.0
 # black>=25.1.0
 # flake8>=7.2.0
 
-# GPU Support (CUDA 11.8) - Stable for most hardware
-# --index-url https://download.pytorch.org/whl/cu118
-# torch>=2.7.1+cu118
-# torchaudio>=2.7.1+cu118
-
-# GPU Support (CUDA 12.1) - For newer hardware
-# --index-url https://download.pytorch.org/whl/cu121
-# torch>=2.7.1+cu121
-# torchaudio>=2.7.1+cu121
+# Note: GPU/CPU versions are handled by the installer
+# GPU Support (CUDA 11.8) - Applied automatically by installer if GPU detected
+# CPU Support - Applied automatically by installer if no GPU detected

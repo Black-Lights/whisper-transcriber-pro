@@ -1,5 +1,6 @@
 """
 Environment Manager - Handles virtual environment setup and package installation
+Fixed version with proper timeout and error handling
 """
 
 import json
@@ -7,6 +8,8 @@ import os
 import platform
 import subprocess
 import sys
+import threading
+import time
 import venv
 from pathlib import Path
 
@@ -109,36 +112,6 @@ class EnvironmentManager:
 
         return status
 
-    def create_requirements_file(self):
-        """Create requirements.txt file"""
-        requirements = [
-            "openai-whisper>=20231117",
-            "torch>=2.0.0",
-            "torchaudio>=2.0.0",
-            "torchvision>=0.15.0",
-            "tqdm>=4.65.0",
-            "numpy>=1.24.0",
-            "ffmpeg-python>=0.2.0",
-        ]
-
-        # Add GPU support for CUDA if available
-        gpu_requirements = [
-            "--index-url https://download.pytorch.org/whl/cu118",
-            "torch>=2.0.0+cu118",
-            "torchaudio>=2.0.0+cu118",
-            "torchvision>=0.15.0+cu118",
-        ]
-
-        with open(self.requirements_file, "w") as f:
-            f.write("# Whisper Transcriber Requirements\n\n")
-            f.write("# CPU-only version (default)\n")
-            for req in requirements:
-                f.write(f"{req}\n")
-
-            f.write("\n# For GPU support, replace torch packages above with:\n")
-            for req in gpu_requirements:
-                f.write(f"# {req}\n")
-
     def setup_environment(self, progress_callback=None):
         """Set up virtual environment and install packages"""
         try:
@@ -157,16 +130,22 @@ class EnvironmentManager:
                 print(f"Creating virtual environment in {self.venv_dir}")
                 venv.create(self.venv_dir, with_pip=True)
 
+            # Ensure requirements.txt exists
+            if not self.requirements_file.exists():
+                if progress_callback:
+                    progress_callback("Creating requirements.txt...")
+                self.create_requirements_file()
+
             if progress_callback:
                 progress_callback("Upgrading pip...")
 
             # Try to upgrade pip with better error handling
             try:
-                self.run_pip_command(["install", "--upgrade", "pip"])
+                self.run_pip_command_basic(["install", "--upgrade", "pip"], timeout=300)
             except Exception as e:
-                # If pip upgrade fails due to the new pip restrictions, try alternative method
+                # If pip upgrade fails, try alternative method
                 error_msg = str(e).lower()
-                if "to modify pip, please run the following command" in error_msg:
+                if "to modify pip" in error_msg or "externally-managed" in error_msg:
                     if progress_callback:
                         progress_callback("Using alternative pip upgrade method...")
                     try:
@@ -187,15 +166,13 @@ class EnvironmentManager:
                         if result.returncode != 0:
                             print(f"Warning: Could not upgrade pip: {result.stderr}")
                             if progress_callback:
-                                progress_callback(
-                                    "Continuing with current pip version..."
-                                )
+                                progress_callback("Continuing with current pip version...")
                     except Exception as e2:
                         print(f"Warning: Pip upgrade failed, continuing anyway: {e2}")
                         if progress_callback:
                             progress_callback("Continuing with current pip version...")
                 else:
-                    raise e
+                    print(f"Warning: Pip upgrade failed: {e}")
 
             if progress_callback:
                 progress_callback("Detecting GPU support...")
@@ -203,32 +180,22 @@ class EnvironmentManager:
             # Detect GPU and install appropriate packages
             gpu_available = self.detect_gpu_support()
 
-            if progress_callback:
-                progress_callback("Installing Whisper and dependencies...")
-
-            # Install compatible setuptools first to avoid pkg_resources issues
-            if progress_callback:
-                progress_callback("Installing compatible setuptools...")
-
-            try:
-                # Install a compatible version of setuptools that doesn't have the pkg_resources deprecation issue
-                self.run_pip_command(["install", "setuptools<70.0.0"])
-            except Exception as e:
-                print(f"Warning: Could not install compatible setuptools: {e}")
-                # Continue anyway, as this might not be critical
-
             # Install packages based on GPU availability
             if gpu_available:
                 print("GPU detected, installing CUDA-enabled packages...")
-                self.install_gpu_packages(progress_callback)
+                success = self.install_gpu_packages(progress_callback)
             else:
                 print("No GPU detected, installing CPU-only packages...")
-                self.install_cpu_packages(progress_callback)
+                success = self.install_cpu_packages(progress_callback)
 
-            if progress_callback:
-                progress_callback("Environment setup complete!")
-
-            return True
+            if success:
+                if progress_callback:
+                    progress_callback("Environment setup complete!")
+                return True
+            else:
+                if progress_callback:
+                    progress_callback("Some packages failed to install")
+                return False
 
         except Exception as e:
             print(f"Environment setup failed: {e}")
@@ -246,163 +213,262 @@ class EnvironmentManager:
             return False
 
     def install_cpu_packages(self, progress_callback=None):
-        """Install CPU-only packages"""
-        packages = [
-            "torch>=2.0.0",
-            "torchaudio>=2.0.0",
-            "tqdm>=4.65.0",
-            "numpy>=1.24.0",
-            "ffmpeg-python>=0.2.0",
-        ]
-
-        for package in packages:
-            if progress_callback:
-                progress_callback(f"Installing {package.split('>=')[0]}...")
-            self.run_pip_command(["install", package])
-
-        # Install openai-whisper last with specific handling
-        if progress_callback:
-            progress_callback("Installing openai-whisper...")
-
+        """Install CPU-only packages from requirements.txt"""
         try:
-            # Try installing openai-whisper with a specific version that's known to work
-            self.run_pip_command(["install", "openai-whisper==20231117"])
-        except Exception as e:
             if progress_callback:
-                progress_callback("Trying alternative whisper installation...")
-            try:
-                # Try installing from git if the regular installation fails
-                self.run_pip_command(
-                    ["install", "git+https://github.com/openai/whisper.git"]
-                )
-            except Exception as e2:
-                print(
-                    f"Warning: Both whisper installations failed. You may need to install manually."
-                )
-                print(f"Error 1: {e}")
-                print(f"Error 2: {e2}")
-                if progress_callback:
-                    progress_callback(
-                        "Warning: Whisper installation failed - install manually later"
-                    )
+                progress_callback("Installing packages from requirements.txt (CPU version)...")
+            
+            # Install from requirements.txt with CPU-only PyTorch
+            success = self.run_pip_command_with_progress(
+                ["install", "-r", str(self.requirements_file), 
+                 "--index-url", "https://download.pytorch.org/whl/cpu"],
+                progress_callback,
+                timeout=1800  # 30 minutes
+            )
+            
+            return success
+
+        except Exception as e:
+            print(f"CPU package installation failed: {e}")
+            return False
 
     def install_gpu_packages(self, progress_callback=None):
-        """Install GPU-enabled packages"""
-        # Install PyTorch with CUDA support first
-        if progress_callback:
-            progress_callback("Installing PyTorch with CUDA support...")
-
-        torch_packages = [
-            "torch>=2.0.0",
-            "torchaudio>=2.0.0",
-            "torchvision>=0.15.0",
-            "--index-url",
-            "https://download.pytorch.org/whl/cu118",
-        ]
-
-        self.run_pip_command(["install"] + torch_packages)
-
-        # Install other packages
-        other_packages = ["tqdm>=4.65.0", "numpy>=1.24.0", "ffmpeg-python>=0.2.0"]
-
-        for package in other_packages:
-            if progress_callback:
-                progress_callback(f"Installing {package.split('>=')[0]}...")
-            self.run_pip_command(["install", package])
-
-        # Install openai-whisper last with specific handling
-        if progress_callback:
-            progress_callback("Installing openai-whisper...")
-
+        """Install GPU-enabled packages from requirements.txt"""
         try:
-            # Try installing openai-whisper with a specific version that's known to work
-            self.run_pip_command(["install", "openai-whisper==20231117"])
-        except Exception as e:
             if progress_callback:
-                progress_callback("Trying alternative whisper installation...")
-            try:
-                # Try installing from git if the regular installation fails
-                self.run_pip_command(
-                    ["install", "git+https://github.com/openai/whisper.git"]
-                )
-            except Exception as e2:
-                print(
-                    f"Warning: Both whisper installations failed. You may need to install manually."
-                )
-                print(f"Error 1: {e}")
-                print(f"Error 2: {e2}")
-                if progress_callback:
-                    progress_callback(
-                        "Warning: Whisper installation failed - install manually later"
-                    )
+                progress_callback("Installing packages from requirements.txt (GPU version - this may take 20-30 minutes)...")
+            
+            # Install from requirements.txt with CUDA PyTorch
+            success = self.run_pip_command_with_progress(
+                ["install", "-r", str(self.requirements_file),
+                 "--index-url", "https://download.pytorch.org/whl/cu118"],
+                progress_callback,
+                timeout=3600  # 1 hour
+            )
+            
+            if not success:
+                print("GPU installation failed, falling back to CPU version...")
+                return self.install_cpu_packages(progress_callback)
 
-    def run_pip_command(self, args):
-        """Run pip command in virtual environment with improved error handling"""
+            return success
+
+        except Exception as e:
+            print(f"GPU package installation failed: {e}")
+            print("Falling back to CPU installation...")
+            return self.install_cpu_packages(progress_callback)
+
+    def create_requirements_file(self):
+        """Create requirements.txt file if it doesn't exist"""
+        if self.requirements_file.exists():
+            return  # File already exists, don't overwrite
+            
+        requirements_content = """# Whisper Transcriber Pro - Requirements (Stable Production Versions)
+# Author: Black-Lights (https://github.com/Black-Lights)
+# Project: Whisper Transcriber Pro v1.2.0
+
+# Install with: pip install -r requirements.txt
+
+# Core dependencies (Stable, well-tested versions)
+openai-whisper>=v20240930
+tqdm>=4.67.1
+numpy>=2.0.2
+requests>=2.32.3
+psutil>=7.0.0
+
+# PyTorch (Stable LTS-like versions)
+torch>=2.7.1
+torchaudio>=2.7.1
+
+# Audio/Video processing
+ffmpeg-python>=0.2.0
+
+# GUI dependencies (included with Python)
+# tkinter (built-in)
+"""
+        
+        try:
+            with open(self.requirements_file, 'w', encoding='utf-8') as f:
+                f.write(requirements_content)
+            print(f"Created requirements.txt with stable dependencies")
+        except Exception as e:
+            print(f"Warning: Could not create requirements.txt: {e}")
+
+    def install_whisper(self, progress_callback=None):
+        """Install OpenAI Whisper - this is now handled by requirements.txt"""
+        # This method is no longer needed since whisper is in requirements.txt
+        # But keeping it for compatibility
+        return True
+
+    def run_pip_command_with_progress(self, args, progress_callback=None, timeout=3600):
+        """Run pip command with real-time progress monitoring"""
         cmd = [str(self.pip_exe)] + args
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=3600)
+        
+        try:
+            # Start process
+            process = subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                bufsize=1,
+                universal_newlines=True
+            )
+            
+            # Monitor progress in separate thread
+            progress_thread = threading.Thread(
+                target=self._monitor_pip_progress,
+                args=(process, progress_callback),
+                daemon=True
+            )
+            progress_thread.start()
+            
+            # Wait for completion with timeout
+            try:
+                stdout, stderr = process.communicate(timeout=timeout)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                stdout, stderr = process.communicate()
+                raise Exception(f"Command timed out after {timeout} seconds")
+            
+            # Wait for progress thread to finish
+            progress_thread.join(timeout=5)
+            
+            if process.returncode == 0:
+                return True
+            else:
+                # Check if it's a real error or just a warning
+                if self._is_real_error(stderr):
+                    print(f"Pip command failed: {stderr}")
+                    return False
+                else:
+                    print(f"Pip completed with warnings: {stderr}")
+                    return True
+                    
+        except Exception as e:
+            print(f"Pip command failed: {e}")
+            return False
 
-        # Handle pip upgrade notices and errors more gracefully
-        if result.returncode != 0:
-            stderr_lower = result.stderr.lower()
+    def run_pip_command_basic(self, args, timeout=600):
+        """Run basic pip command with simple error handling"""
+        cmd = [str(self.pip_exe)] + args
+        
+        try:
+            result = subprocess.run(
+                cmd, 
+                capture_output=True, 
+                text=True, 
+                timeout=timeout
+            )
+            
+            if result.returncode == 0:
+                return True
+            elif not self._is_real_error(result.stderr):
+                # Not a real error, just warnings
+                return True
+            else:
+                print(f"Pip command failed: {result.stderr}")
+                return False
+                
+        except subprocess.TimeoutExpired:
+            print(f"Pip command timed out after {timeout} seconds")
+            return False
+        except Exception as e:
+            print(f"Pip command failed: {e}")
+            return False
 
-            # Check if it's just a pip upgrade notice (not a real error)
-            if (
-                "new release of pip is available" in stderr_lower
-                and "error:" not in stderr_lower
-                and "failed" not in stderr_lower
-            ):
-                print(f"Note: {result.stderr.strip()}")
-                return result
+    def _monitor_pip_progress(self, process, progress_callback):
+        """Monitor pip output for progress information"""
+        if not progress_callback:
+            return
+            
+        download_started = False
+        last_update = time.time()
+        
+        while process.poll() is None:
+            try:
+                # Read output line by line
+                line = process.stdout.readline()
+                if line:
+                    line = line.strip()
+                    
+                    # Look for download progress
+                    if "Downloading" in line and ("MB" in line or "GB" in line):
+                        if not download_started:
+                            progress_callback("Download started...")
+                            download_started = True
+                        
+                        # Extract progress if available
+                        if "/" in line and ("MB" in line or "GB" in line):
+                            try:
+                                # Extract size info
+                                parts = line.split()
+                                for i, part in enumerate(parts):
+                                    if "/" in part and ("MB" in part or "GB" in part):
+                                        progress_callback(f"Downloading: {part}")
+                                        break
+                            except:
+                                pass
+                    
+                    elif "Installing" in line or "Successfully installed" in line:
+                        progress_callback("Installing packages...")
+                    
+                    # Update every 10 seconds to avoid spam
+                    if time.time() - last_update > 10:
+                        if download_started:
+                            progress_callback("Download in progress... please wait")
+                        last_update = time.time()
+                        
+            except Exception:
+                break
+                
+            time.sleep(1)
 
-            # Handle specific pip modification error
-            if "to modify pip, please run the following command" in stderr_lower:
-                print("Attempting to resolve pip upgrade issue...")
-                try:
-                    # Try using python -m pip instead
-                    upgrade_cmd = [
-                        str(self.python_exe),
-                        "-m",
-                        "pip",
-                        "install",
-                        "--upgrade",
-                        "pip",
-                    ]
-                    upgrade_result = subprocess.run(
-                        upgrade_cmd, capture_output=True, text=True, timeout=600
-                    )
-
-                    if upgrade_result.returncode == 0:
-                        print("Pip upgraded successfully, retrying original command...")
-                        # Retry the original command
-                        retry_result = subprocess.run(
-                            cmd, capture_output=True, text=True, timeout=1200
-                        )
-                        if retry_result.returncode == 0:
-                            return retry_result
-                        else:
-                            # If retry also fails, raise the original error
-                            raise Exception(
-                                f"Pip command failed after retry: {retry_result.stderr}"
-                            )
-                    else:
-                        print(
-                            f"Warning: Could not upgrade pip: {upgrade_result.stderr}"
-                        )
-                        # Continue with the original error
-                        raise Exception(f"Pip command failed: {result.stderr}")
-                except Exception as upgrade_error:
-                    print(f"Warning: Pip upgrade attempt failed: {upgrade_error}")
-                    raise Exception(f"Pip command failed: {result.stderr}")
-
-            # For any other error, raise it
-            raise Exception(f"Pip command failed: {result.stderr}")
-
-        return result
+    def _is_real_error(self, stderr):
+        """Determine if stderr contains a real error or just warnings"""
+        if not stderr:
+            return False
+            
+        stderr_lower = stderr.lower()
+        
+        # These are warnings, not errors
+        warning_phrases = [
+            "new release of pip is available",
+            "you should consider upgrading",
+            "deprecation",
+            "warning",
+            "note:",
+        ]
+        
+        # These are real errors
+        error_phrases = [
+            "error:",
+            "failed",
+            "could not",
+            "unable to",
+            "permission denied",
+            "access denied",
+            "no module named",
+            "syntax error",
+            "import error",
+        ]
+        
+        # Check for real errors first
+        for phrase in error_phrases:
+            if phrase in stderr_lower:
+                return True
+                
+        # If only warnings, not a real error
+        for phrase in warning_phrases:
+            if phrase in stderr_lower:
+                return False
+                
+        # If we can't determine, assume it's an error
+        return True
 
     def run_python_command(self, args):
         """Run Python command in virtual environment"""
         cmd = [str(self.python_exe)] + args
-        result = subprocess.run(cmd, capture_output=True, text=True)
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
 
         if result.returncode != 0:
             raise Exception(f"Python command failed: {result.stderr}")
@@ -414,7 +480,11 @@ class EnvironmentManager:
         import shutil
 
         if self.venv_dir.exists():
-            shutil.rmtree(self.venv_dir)
+            try:
+                shutil.rmtree(self.venv_dir)
+                print("Removed existing virtual environment")
+            except Exception as e:
+                print(f"Warning: Could not remove virtual environment: {e}")
 
     def get_activation_command(self):
         """Get command to activate virtual environment"""
@@ -435,8 +505,12 @@ class EnvironmentManager:
         # Get installed packages if environment is working
         if info["status"]["python_works"]:
             try:
-                result = self.run_pip_command(["list", "--format=json"])
-                info["installed_packages"] = json.loads(result.stdout)
+                result = self.run_pip_command_basic(["list", "--format=json"])
+                if result:
+                    cmd = [str(self.pip_exe), "list", "--format=json"]
+                    result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+                    if result.returncode == 0:
+                        info["installed_packages"] = json.loads(result.stdout)
             except:
                 info["installed_packages"] = []
 
