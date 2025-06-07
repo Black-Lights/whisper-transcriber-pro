@@ -5,17 +5,15 @@
 # Install with: pip install -r requirements.txt
 
 # Core dependencies
-openai-whisper>=20231117
-tqdm>=4.65.0
-numpy>=1.24.0
-requests>=2.28.0
-
-# For CPU-only installation (default)
-torch>=2.0.0
-torchaudio>=2.0.0
-
-# Process management and system monitoring
+openai-whisper>=20240930
+tqdm>=4.67.1
+numpy>=2.2.6
+requests>=2.32.3
 psutil>=7.0.0
+
+# PyTorch (CPU-only installation by default)
+torch>=2.7.1
+torchaudio>=0.22.1
 
 # Audio/Video processing
 ffmpeg-python>=0.2.0
@@ -30,10 +28,10 @@ ffmpeg-python>=0.2.0
 
 # GPU Support (CUDA 11.8) - Uncomment for GPU installation
 # --index-url https://download.pytorch.org/whl/cu118
-# torch>=2.0.0+cu118
-# torchaudio>=2.0.0+cu118
+# torch>=2.7.1+cu118
+# torchaudio>=0.22.1+cu118
 
-# Alternative GPU Support (CUDA 12.1)
-# --index-url https://download.pytorch.org/whl/cu121
-# torch>=2.0.0+cu121
-# torchaudio>=2.0.0+cu121
+# GPU Support (CUDA 12.6) - Latest - Uncomment for GPU installation
+# --index-url https://download.pytorch.org/whl/cu126
+# torch>=2.7.1+cu126
+# torchaudio>=0.22.1+cu126
