@@ -262,28 +262,27 @@ class EnvironmentManager:
         if self.requirements_file.exists():
             return  # File already exists, don't overwrite
             
-        requirements_content = """# Whisper Transcriber Pro - Requirements (Stable Production Versions)
+        requirements_content = """# Whisper Transcriber Pro - Requirements (Fixed Version)
 # Author: Black-Lights (https://github.com/Black-Lights)
 # Project: Whisper Transcriber Pro v1.2.0
 
-# Install with: pip install -r requirements.txt
+# Core AI dependencies
+openai-whisper>=20231117
+torch>=2.0.0
+torchaudio>=2.0.0
 
-# Core dependencies (Stable, well-tested versions)
-openai-whisper>=v20240930
-tqdm>=4.67.1
-numpy>=2.0.2
-requests>=2.32.3
-psutil>=7.0.0
-
-# PyTorch (Stable LTS-like versions)
-torch>=2.7.1
-torchaudio>=2.7.1
+# Essential utilities
+tqdm>=4.65.0
+numpy>=1.24.0
+requests>=2.28.0
+psutil>=5.9.0
 
 # Audio/Video processing
 ffmpeg-python>=0.2.0
 
-# GUI dependencies (included with Python)
-# tkinter (built-in)
+# Additional dependencies that whisper might need
+more-itertools>=8.0.0
+tiktoken>=0.3.0
 """
         
         try:
@@ -433,23 +432,30 @@ ffmpeg-python>=0.2.0
         # These are warnings, not errors
         warning_phrases = [
             "new release of pip is available",
+            "to update, run:",
             "you should consider upgrading",
             "deprecation",
-            "warning",
-            "note:",
+            "warning:",
+            "notice:",
+            "[notice]",
         ]
         
         # These are real errors
         error_phrases = [
-            "error:",
+            "could not find a version that satisfies",
+            "no matching distribution found",
+            "failed building wheel",
+            "error: microsoft visual c++",
             "failed",
             "could not",
             "unable to",
             "permission denied",
-            "access denied",
+            "access denied", 
             "no module named",
             "syntax error",
             "import error",
+            "connection error",
+            "timeout",
         ]
         
         # Check for real errors first

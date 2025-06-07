@@ -147,23 +147,27 @@ class WhisperInstaller:
         if requirements_file.exists():
             return  # File already exists
             
-        requirements_content = """# Whisper Transcriber Pro - Requirements (Stable Production Versions)
+        requirements_content = """# Whisper Transcriber Pro - Requirements (Fixed Version)
 # Author: Black-Lights (https://github.com/Black-Lights)
 # Project: Whisper Transcriber Pro v1.2.0
 
-# Core dependencies (Stable, well-tested versions)
-openai-whisper>=v20240930
-tqdm>=4.67.1
-numpy>=2.0.2
-requests>=2.32.3
-psutil>=7.0.0
+# Core AI dependencies
+openai-whisper>=20231117
+torch>=2.0.0
+torchaudio>=2.0.0
 
-# PyTorch (Stable LTS-like versions)
-torch>=2.7.1
-torchaudio>=2.7.1
+# Essential utilities
+tqdm>=4.65.0
+numpy>=1.24.0
+requests>=2.28.0
+psutil>=5.9.0
 
 # Audio/Video processing
 ffmpeg-python>=0.2.0
+
+# Additional dependencies that whisper might need
+more-itertools>=8.0.0
+tiktoken>=0.3.0
 """
         
         try:
