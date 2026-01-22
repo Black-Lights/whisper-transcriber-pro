@@ -253,6 +253,7 @@ class EnvironmentManager:
             "tqdm>=4.65.0",
             "numpy>=1.24.0",
             "ffmpeg-python>=0.2.0",
+            "psutil>=5.9.0",
         ]
 
         for package in packages:
@@ -303,7 +304,7 @@ class EnvironmentManager:
         self.run_pip_command(["install"] + torch_packages)
 
         # Install other packages
-        other_packages = ["tqdm>=4.65.0", "numpy>=1.24.0", "ffmpeg-python>=0.2.0"]
+        other_packages = ["tqdm>=4.65.0", "numpy>=1.24.0", "ffmpeg-python>=0.2.0", "psutil>=5.9.0"]
 
         for package in other_packages:
             if progress_callback:
