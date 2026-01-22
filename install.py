@@ -333,7 +333,7 @@ python main.py
                     # Ask about model download
                     download_model = input("\nDownload default model (medium, ~769MB)? (y/N): ").lower().startswith('y')
                     if download_model:
-                        self.download_model()
+                        self.download_default_model()
 
             print("\n" + "="*50)
             print("INSTALLATION COMPLETED!")
