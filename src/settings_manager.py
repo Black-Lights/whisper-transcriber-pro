@@ -15,7 +15,7 @@ class SettingsManager:
         self.settings_file = self.app_dir / "settings.json"
         self.default_settings = {
             "general": {
-                "default_model": "medium",
+                "default_model": "large-v3-turbo",
                 "default_language": "auto",
                 "default_device": "gpu",
                 "default_output_dir": str(Path.home() / "Documents" / "Whisper_Output"),
@@ -31,13 +31,15 @@ class SettingsManager:
             },
             "advanced": {
                 "gpu_memory_fraction": 0.8,
-                "batch_size": 16,
-                "beam_size": 5,
-                "best_of": 5,
+                "batch_size": 8,
+                "beam_size": 1,
+                "best_of": 1,
                 "temperature": 0.0,
                 "compression_ratio_threshold": 2.4,
                 "logprob_threshold": -1.0,
-                "no_speech_threshold": 0.6,
+                "no_speech_threshold": 0.3,
+                "vad_filter": True,
+                "compute_type": "int8",
             },
             "ui": {
                 "theme": "default",
@@ -163,7 +165,15 @@ class SettingsManager:
         errors = []
 
         # Validate model
-        valid_models = ["tiny", "base", "small", "medium", "large"]
+        valid_models = [
+            "tiny",
+            "base",
+            "small",
+            "medium",
+            "large-v3",
+            "large-v3-turbo",
+            "distil-large-v3",
+        ]
         model = self.get_setting("general", "default_model")
         if model not in valid_models:
             errors.append(f"Invalid model: {model}")
@@ -199,8 +209,11 @@ class SettingsManager:
 
     def get_transcription_options(self):
         """Get transcription options from settings"""
+        advanced = self.settings.get("advanced", {})
         return {
-            "model_size": self.get_setting("general", "default_model", "medium"),
+            "model_size": self.get_setting(
+                "general", "default_model", "large-v3-turbo"
+            ),
             "language": self.get_setting("general", "default_language", "auto"),
             "device": self.get_setting("general", "default_device", "gpu"),
             "output_formats": self.get_setting(
@@ -218,6 +231,13 @@ class SettingsManager:
             "max_chars_per_line": self.get_setting("output", "text_processing")[
                 "max_chars_per_line"
             ],
+            # Advanced settings for faster-whisper
+            "beam_size": advanced.get("beam_size", 1),
+            "best_of": advanced.get("best_of", 1),
+            "temperature": advanced.get("temperature", 0.0),
+            "batch_size": advanced.get("batch_size", 8),
+            "vad_filter": advanced.get("vad_filter", True),
+            "compute_type": advanced.get("compute_type", "int8"),
         }
 
     def update_from_ui(self, ui_values):

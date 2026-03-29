@@ -40,7 +40,7 @@ class WhisperTranscriberGUI:
     def __init__(self, root):
         """Initialize the main GUI application."""
         self.root = root
-        self.root.title("Whisper Transcriber Pro v1.2.0 - Live Edition")
+        self.root.title("Whisper Transcriber Pro v2.0.0 - Turbo Edition")
         self.root.geometry("1200x900")
         self.root.resizable(True, True)
         self.root.configure(bg="#f0f0f0")
@@ -74,7 +74,7 @@ class WhisperTranscriberGUI:
         # Variables
         self.input_file = tk.StringVar()
         self.output_dir = tk.StringVar(value=str(Path.home() / "Documents"))
-        self.model_size = tk.StringVar(value="medium")
+        self.model_size = tk.StringVar(value="large-v3-turbo")
         self.language = tk.StringVar(value="auto")
         self.device_type = tk.StringVar(value="gpu")
         self.output_formats = {
@@ -408,7 +408,15 @@ class WhisperTranscriberGUI:
         model_combo = ttk.Combobox(
             model_row,
             textvariable=self.model_size,
-            values=["tiny", "base", "small", "medium", "large"],
+            values=[
+                "tiny",
+                "base",
+                "small",
+                "medium",
+                "large-v3",
+                "large-v3-turbo",
+                "distil-large-v3",
+            ],
             state="readonly",
             width=12,
             font=("Segoe UI", 9),
@@ -612,7 +620,9 @@ class WhisperTranscriberGUI:
 
         # Version info
         version_label = ttk.Label(
-            footer_frame, text="v1.2.0 - Complete Live Edition", style="Info.TLabel"
+            footer_frame,
+            text="v2.0.0 - Turbo Edition (faster-whisper)",
+            style="Info.TLabel",
         )
         version_label.pack(side=tk.RIGHT)
 
@@ -772,10 +782,13 @@ class WhisperTranscriberGUI:
             # Update segment progress
             current_seg = segment_data.get("segment_index", 0)
             total_seg = segment_data.get("total_segments", 0)
+            self.current_segment = current_seg
             if total_seg > 0:
                 self.segment_label.config(text=f"{current_seg} of {total_seg}")
-                self.current_segment = current_seg
                 self.total_segments = total_seg
+            else:
+                # faster-whisper generator doesn't know total upfront
+                self.segment_label.config(text=f"{current_seg}")
 
             # Update confidence
             confidence = segment_data.get("avg_logprob", 0)
@@ -911,27 +924,36 @@ class WhisperTranscriberGUI:
 
     def show_model_info(self):
         """Show model information dialog"""
-        info = """Model Size Information:
+        info = """Model Information (faster-whisper + CTranslate2):
 
-tiny: Fastest, least accurate (~39 MB)
-   • Speed: ~32x real-time (GPU)
-   • Quality: Basic transcription
+tiny: Fastest, least accurate (~75 MB)
+   Speed: ~100x real-time (GPU batched)
+   Quality: Basic transcription
 
-base: Good speed/accuracy balance (~74 MB)
-   • Speed: ~16x real-time (GPU)
-   • Quality: Good for clear audio
+base: Good speed/accuracy balance (~145 MB)
+   Speed: ~80x real-time (GPU batched)
+   Quality: Good for clear audio
 
-small: Better accuracy (~244 MB)
-   • Speed: ~6x real-time (GPU)
-   • Quality: Good for most content
+small: Better accuracy (~488 MB)
+   Speed: ~60x real-time (GPU batched)
+   Quality: Good for most content
 
-medium: High accuracy - RECOMMENDED (~769 MB)
-   • Speed: ~2x real-time (GPU)
-   • Quality: Excellent for professional use
+medium: High accuracy (~1.5 GB)
+   Speed: ~40x real-time (GPU batched)
+   Quality: Excellent for professional use
 
-large: Best accuracy, slowest (~1550 MB)
-   • Speed: ~1x real-time (GPU)
-   • Quality: Maximum accuracy"""
+large-v3-turbo: Fast + accurate - RECOMMENDED (~1.6 GB)
+   Speed: ~60x real-time (GPU batched)
+   Quality: 7.75% WER - better than medium!
+   Note: Best speed/accuracy tradeoff
+
+large-v3: Best accuracy, needs 10GB+ VRAM (~3.1 GB)
+   Speed: ~20x real-time (GPU batched)
+   Quality: Maximum accuracy (7.4% WER)
+
+distil-large-v3: Distilled, very fast (~1.5 GB)
+   Speed: ~70x real-time (GPU batched)
+   Quality: Within 1% of large-v3"""
 
         messagebox.showinfo("Model Information", info)
 
@@ -1052,6 +1074,9 @@ large: Best accuracy, slowest (~1550 MB)
                 # Initialize transcription engine
                 self.transcription_engine = TranscriptionEngine(self.env_manager)
 
+                # Get advanced settings
+                advanced = self.settings_manager.settings.get("advanced", {})
+
                 # Prepare options with live callback
                 options = {
                     "model_size": self.model_size.get(),
@@ -1067,6 +1092,13 @@ large: Best accuracy, slowest (~1550 MB)
                     "word_timestamps": self.word_timestamps.get(),
                     "enhanced_silence_handling": True,
                     "live_callback": self.update_live_transcription,
+                    # Advanced faster-whisper settings
+                    "beam_size": advanced.get("beam_size", 1),
+                    "best_of": advanced.get("best_of", 1),
+                    "temperature": advanced.get("temperature", 0.0),
+                    "batch_size": advanced.get("batch_size", 8),
+                    "vad_filter": advanced.get("vad_filter", True),
+                    "compute_type": advanced.get("compute_type", "int8"),
                 }
 
                 # Update status

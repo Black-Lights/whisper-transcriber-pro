@@ -238,48 +238,40 @@ class TranscriptionEngine:
                 script_path.unlink()
 
     def create_enhanced_transcription_script(self, input_file, options):
-        """Create enhanced Python script for transcription with live updates"""
-        # Enhanced parameters for better silence and poor audio handling
-        enhanced_params = {
-            "no_speech_threshold": 0.3,  # More aggressive - detect speech in poor audio
-            "logprob_threshold": -2.0,  # Accept much lower confidence
-            "compression_ratio_threshold": 3.0,  # Allow more repetitive content
-            "condition_on_previous_text": True,
-            "temperature": [0.0, 0.2, 0.4, 0.6, 0.8, 1.0],  # Multiple attempts
-            "beam_size": 5,  # Better search
-            "best_of": 5,  # Try multiple candidates
-            "patience": 2.0,  # Wait longer for speech
-            "length_penalty": 1.0,  # Don't penalize longer sequences
-        }
-
-        # Override with more aggressive settings if enhanced silence handling is enabled
-        if options.get("enhanced_silence_handling"):
-            enhanced_params.update(
-                {
-                    "no_speech_threshold": 0.1,  # Very aggressive
-                    "logprob_threshold": -3.0,  # Accept very low confidence
-                    "initial_prompt": "This is a lecture or presentation recording that may contain periods of silence, background noise, or unclear audio. Please transcribe all audible speech.",
-                }
-            )
-
+        """Create enhanced Python script for transcription with live updates using faster-whisper"""
         # Handle language option
         language = options.get("language", "")
-        if language and language != "auto":
-            language_line = f'        transcribe_options["language"] = "{language}"'
-        else:
-            language_line = "        # Auto-detect language"
+        language_value = f'"{language}"' if language and language != "auto" else "None"
 
         # Word timestamps
         word_timestamps_value = (
             "True" if options.get("word_timestamps", False) else "False"
         )
 
+        # Device and compute type
+        device = options.get("device", "gpu")
+        compute_type = options.get("compute_type", "int8")
+
+        # Get advanced settings with fast defaults
+        beam_size = options.get("beam_size", 1)
+        best_of = options.get("best_of", 1)
+        temperature = options.get("temperature", 0.0)
+        batch_size = options.get("batch_size", 8)
+        vad_filter = options.get("vad_filter", True)
+
+        # Enhanced silence handling adjustments
+        no_speech_threshold = 0.3
+        log_prob_threshold = -1.0
+        initial_prompt = ""
+        if options.get("enhanced_silence_handling"):
+            no_speech_threshold = 0.1
+            log_prob_threshold = -3.0
+            initial_prompt = "This is a lecture or presentation recording that may contain periods of silence, background noise, or unclear audio. Please transcribe all audible speech."
+
         script = f'''
 import os
-os.environ['CUDA_VISIBLE_DEVICES'] = '0' if '{options["device"]}' == 'gpu' else ''
+os.environ['CUDA_VISIBLE_DEVICES'] = '0' if '{device}' == 'gpu' else ''
 
-import whisper
-import torch
 import json
 import sys
 import time
@@ -297,70 +289,110 @@ def log_progress(message, segment_data=None):
 
 def main():
     try:
-        log_progress("🔧 Initializing transcription engine...")
+        log_progress("Initializing faster-whisper engine...")
 
-        # Load model
-        device = "cuda" if torch.cuda.is_available() and "{options['device']}" == "gpu" else "cpu"
-        log_progress(f"📥 Loading {{'{options['model_size']}'}} model on {{device.upper()}}...")
+        from faster_whisper import WhisperModel
 
-        model = whisper.load_model("{options['model_size']}", device=device)
+        # Determine device
+        use_gpu = '{device}' == 'gpu'
+        if use_gpu:
+            try:
+                import ctranslate2
+                device_str = "cuda"
+                compute_type_str = "{compute_type}"
+            except Exception:
+                device_str = "cpu"
+                compute_type_str = "int8"
+                log_progress("CUDA not available, falling back to CPU")
+        else:
+            device_str = "cpu"
+            compute_type_str = "int8"
 
-        log_progress("🎵 Processing audio file...")
+        log_progress(f"Loading '{options['model_size']}' model on {{device_str.upper()}} ({{compute_type_str}})...")
 
-        # Enhanced transcription options
-        transcribe_options = {{
-            "fp16": device == "cuda",
-            "task": "transcribe",
-            "verbose": True,
-            "no_speech_threshold": {enhanced_params['no_speech_threshold']},
-            "logprob_threshold": {enhanced_params['logprob_threshold']},
-            "compression_ratio_threshold": {enhanced_params['compression_ratio_threshold']},
-            "condition_on_previous_text": {enhanced_params['condition_on_previous_text']},
-            "temperature": {enhanced_params['temperature']},
-            "beam_size": {enhanced_params['beam_size']},
-            "best_of": {enhanced_params['best_of']},
-            "patience": {enhanced_params['patience']},
-            "length_penalty": {enhanced_params['length_penalty']}
+        model = WhisperModel("{options['model_size']}", device=device_str, compute_type=compute_type_str)
+
+        log_progress("Starting transcription...")
+
+        # Build transcription options
+        transcribe_kwargs = {{
+            "beam_size": {beam_size},
+            "best_of": {best_of},
+            "temperature": {temperature},
+            "vad_filter": {vad_filter},
+            "vad_parameters": dict(min_silence_duration_ms=500),
+            "condition_on_previous_text": True,
+            "no_speech_threshold": {no_speech_threshold},
+            "log_prob_threshold": {log_prob_threshold},
+            "compression_ratio_threshold": 2.4,
+            "word_timestamps": {word_timestamps_value},
         }}
 
         # Add language if specified
-{language_line}
+        language = {language_value}
+        if language:
+            transcribe_kwargs["language"] = language
 
-        # Add word timestamps if requested
-        if {word_timestamps_value}:
-            transcribe_options["word_timestamps"] = True
+        # Add initial prompt for enhanced silence handling
+        initial_prompt = """{initial_prompt}"""
+        if initial_prompt:
+            transcribe_kwargs["initial_prompt"] = initial_prompt
 
-        # Add initial prompt for enhanced handling
-        if "{options.get('enhanced_silence_handling', False)}":
-            transcribe_options["initial_prompt"] = "{enhanced_params.get('initial_prompt', '')}"
+        # Use batched inference on GPU for maximum speed
+        if device_str == "cuda":
+            try:
+                from faster_whisper import BatchedInferencePipeline
+                batched_model = BatchedInferencePipeline(model=model)
+                transcribe_kwargs["batch_size"] = {batch_size}
+                log_progress("Using batched GPU inference (batch_size={batch_size})...")
+                segments_gen, info = batched_model.transcribe(r"{input_file}", **transcribe_kwargs)
+            except Exception as e:
+                log_progress(f"Batched inference failed, using standard mode: {{e}}")
+                segments_gen, info = model.transcribe(r"{input_file}", **transcribe_kwargs)
+        else:
+            segments_gen, info = model.transcribe(r"{input_file}", **transcribe_kwargs)
 
-        log_progress("🚀 Starting transcription...")
-
-        # Transcribe with progress tracking
         start_time = time.time()
-        result = model.transcribe(r"{input_file}", **transcribe_options)
 
-        # Process segments for live updates
-        total_segments = len(result.get("segments", []))
-        duration = result.get("duration", 0)
+        # Process segments from generator -- live updates during transcription
+        segments_list = []
+        full_text = ""
+        audio_duration = info.duration if info.duration else 0
 
-        log_progress(f"✅ Transcription complete! Processed {{total_segments}} segments in {{time.time() - start_time:.1f}}s")
-
-        # Send final segment data for live display
-        for i, segment in enumerate(result.get("segments", [])):
-            segment_data = {{
-                "start": segment["start"],
-                "end": segment["end"],
-                "text": segment["text"],
-                "segment_index": i + 1,
-                "total_segments": total_segments,
-                "duration": duration,
-                "avg_logprob": segment.get("avg_logprob", 0)
+        for i, segment in enumerate(segments_gen):
+            seg_dict = {{
+                "start": segment.start,
+                "end": segment.end,
+                "text": segment.text,
+                "avg_logprob": segment.avg_logprob,
             }}
-            log_progress(f"📝 Segment {{i + 1}}/{{total_segments}}", segment_data)
-            time.sleep(0.1)  # Small delay for UI updates
+            segments_list.append(seg_dict)
+            full_text += segment.text
 
-        # Save result with UTF-8 encoding
+            # Send live update for each segment
+            segment_data = {{
+                "start": segment.start,
+                "end": segment.end,
+                "text": segment.text,
+                "segment_index": i + 1,
+                "total_segments": 0,
+                "duration": audio_duration,
+                "avg_logprob": segment.avg_logprob,
+            }}
+            log_progress(f"Segment {{i + 1}}", segment_data)
+
+        total_segments = len(segments_list)
+        elapsed = time.time() - start_time
+        log_progress(f"Transcription complete! {{total_segments}} segments in {{elapsed:.1f}}s")
+
+        # Save result in compatible format
+        result = {{
+            "text": full_text,
+            "segments": segments_list,
+            "language": info.language,
+            "duration": audio_duration,
+        }}
+
         result_file = Path(__file__).parent / "temp_result_enhanced.json"
         with open(result_file, 'w', encoding='utf-8') as f:
             json.dump(result, f, ensure_ascii=False, indent=2)
@@ -368,7 +400,7 @@ def main():
         print("TRANSCRIPTION_COMPLETE")
 
     except Exception as e:
-        log_progress(f"❌ Error: {{str(e)}}")
+        log_progress(f"Error: {{str(e)}}")
         print(f"ERROR: {{e}}", file=sys.stderr)
         sys.exit(1)
 
@@ -411,14 +443,19 @@ if __name__ == "__main__":
                                 # Calculate progress percentage
                                 if "live_segment" in update_data:
                                     segment_data = update_data["live_segment"]
-                                    if segment_data.get("total_segments", 0) > 0:
+                                    duration = segment_data.get("duration", 0)
+
+                                    # Use time-based progress (segment.end / total_duration)
+                                    if duration > 0:
                                         progress = (
-                                            segment_data["segment_index"]
-                                            / segment_data["total_segments"]
+                                            segment_data.get("end", 0) / duration
                                         ) * 100
+                                        progress = min(
+                                            99, progress
+                                        )  # Cap at 99 until complete
                                         update_data["progress_percent"] = progress
 
-                                        # Calculate ETA
+                                        # Calculate ETA based on time progress
                                         elapsed = time.time() - start_time
                                         if progress > 0:
                                             eta = (elapsed / progress * 100) - elapsed

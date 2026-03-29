@@ -74,9 +74,9 @@ class EnvironmentManager:
             # Check if packages are installed
             if status["python_works"]:
                 try:
-                    # Check whisper
+                    # Check faster-whisper
                     result = subprocess.run(
-                        [str(self.python_exe), "-c", "import whisper"],
+                        [str(self.python_exe), "-c", "import faster_whisper"],
                         capture_output=True,
                         timeout=10,
                     )
@@ -112,32 +112,18 @@ class EnvironmentManager:
     def create_requirements_file(self):
         """Create requirements.txt file"""
         requirements = [
-            "openai-whisper>=20231117",
-            "torch>=2.0.0",
-            "torchaudio>=2.0.0",
-            "torchvision>=0.15.0",
+            "faster-whisper>=1.0.0",
             "tqdm>=4.65.0",
             "numpy>=1.24.0",
             "ffmpeg-python>=0.2.0",
-        ]
-
-        # Add GPU support for CUDA if available
-        gpu_requirements = [
-            "--index-url https://download.pytorch.org/whl/cu118",
-            "torch>=2.0.0+cu118",
-            "torchaudio>=2.0.0+cu118",
-            "torchvision>=0.15.0+cu118",
+            "psutil>=5.9.0",
         ]
 
         with open(self.requirements_file, "w") as f:
             f.write("# Whisper Transcriber Requirements\n\n")
-            f.write("# CPU-only version (default)\n")
+            f.write("# Core dependencies\n")
             for req in requirements:
                 f.write(f"{req}\n")
-
-            f.write("\n# For GPU support, replace torch packages above with:\n")
-            for req in gpu_requirements:
-                f.write(f"# {req}\n")
 
     def setup_environment(self, progress_callback=None):
         """Set up virtual environment and install packages"""
@@ -248,8 +234,6 @@ class EnvironmentManager:
     def install_cpu_packages(self, progress_callback=None):
         """Install CPU-only packages"""
         packages = [
-            "torch>=2.0.0",
-            "torchaudio>=2.0.0",
             "tqdm>=4.65.0",
             "numpy>=1.24.0",
             "ffmpeg-python>=0.2.0",
@@ -261,81 +245,46 @@ class EnvironmentManager:
                 progress_callback(f"Installing {package.split('>=')[0]}...")
             self.run_pip_command(["install", package])
 
-        # Install openai-whisper last with specific handling
+        # Install faster-whisper (includes CTranslate2)
         if progress_callback:
-            progress_callback("Installing openai-whisper...")
+            progress_callback("Installing faster-whisper...")
 
         try:
-            # Try installing openai-whisper with a specific version that's known to work
-            self.run_pip_command(["install", "openai-whisper==20231117"])
+            self.run_pip_command(["install", "faster-whisper>=1.0.0"])
         except Exception as e:
+            print(f"Warning: faster-whisper installation failed: {e}")
             if progress_callback:
-                progress_callback("Trying alternative whisper installation...")
-            try:
-                # Try installing from git if the regular installation fails
-                self.run_pip_command(
-                    ["install", "git+https://github.com/openai/whisper.git"]
+                progress_callback(
+                    "Warning: faster-whisper installation failed - install manually later"
                 )
-            except Exception as e2:
-                print(
-                    f"Warning: Both whisper installations failed. You may need to install manually."
-                )
-                print(f"Error 1: {e}")
-                print(f"Error 2: {e2}")
-                if progress_callback:
-                    progress_callback(
-                        "Warning: Whisper installation failed - install manually later"
-                    )
 
     def install_gpu_packages(self, progress_callback=None):
-        """Install GPU-enabled packages"""
-        # Install PyTorch with CUDA support first
-        if progress_callback:
-            progress_callback("Installing PyTorch with CUDA support...")
-
-        torch_packages = [
-            "torch>=2.0.0",
-            "torchaudio>=2.0.0",
-            "torchvision>=0.15.0",
-            "--index-url",
-            "https://download.pytorch.org/whl/cu118",
+        """Install GPU-enabled packages with CUDA support"""
+        # Install other packages first
+        other_packages = [
+            "tqdm>=4.65.0",
+            "numpy>=1.24.0",
+            "ffmpeg-python>=0.2.0",
+            "psutil>=5.9.0",
         ]
-
-        self.run_pip_command(["install"] + torch_packages)
-
-        # Install other packages
-        other_packages = ["tqdm>=4.65.0", "numpy>=1.24.0", "ffmpeg-python>=0.2.0", "psutil>=5.9.0"]
 
         for package in other_packages:
             if progress_callback:
                 progress_callback(f"Installing {package.split('>=')[0]}...")
             self.run_pip_command(["install", package])
 
-        # Install openai-whisper last with specific handling
+        # Install faster-whisper (includes CTranslate2 with CUDA support)
         if progress_callback:
-            progress_callback("Installing openai-whisper...")
+            progress_callback("Installing faster-whisper with CUDA support...")
 
         try:
-            # Try installing openai-whisper with a specific version that's known to work
-            self.run_pip_command(["install", "openai-whisper==20231117"])
+            self.run_pip_command(["install", "faster-whisper>=1.0.0"])
         except Exception as e:
+            print(f"Warning: faster-whisper installation failed: {e}")
             if progress_callback:
-                progress_callback("Trying alternative whisper installation...")
-            try:
-                # Try installing from git if the regular installation fails
-                self.run_pip_command(
-                    ["install", "git+https://github.com/openai/whisper.git"]
+                progress_callback(
+                    "Warning: faster-whisper installation failed - install manually later"
                 )
-            except Exception as e2:
-                print(
-                    f"Warning: Both whisper installations failed. You may need to install manually."
-                )
-                print(f"Error 1: {e}")
-                print(f"Error 2: {e2}")
-                if progress_callback:
-                    progress_callback(
-                        "Warning: Whisper installation failed - install manually later"
-                    )
 
     def run_pip_command(self, args):
         """Run pip command in virtual environment with improved error handling"""
