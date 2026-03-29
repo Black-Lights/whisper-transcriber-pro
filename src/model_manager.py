@@ -3,11 +3,10 @@ Model Manager - Handles Whisper model downloading and management
 Author: Black-Lights (https://github.com/Black-Lights)
 Project: Whisper Transcriber Pro
 
-This module provides comprehensive management of OpenAI Whisper models including
-downloading, verification, caching, and maintenance operations.
+This module provides management of faster-whisper CTranslate2 models including
+downloading, caching, and maintenance operations.
 """
 
-import hashlib
 import json
 import os
 import shutil
@@ -15,69 +14,75 @@ import subprocess
 import tempfile
 import time
 from pathlib import Path
-from urllib.parse import urlparse
 
 import requests
 
 
 class ModelManager:
-    """Manages OpenAI Whisper model downloading, verification, and caching.
+    """Manages faster-whisper model downloading and caching.
 
     This class handles all aspects of Whisper model management including:
-    - Downloading models from OpenAI servers
-    - Verifying model integrity using SHA256 checksums
+    - Downloading models via faster-whisper (from HuggingFace)
     - Caching models for offline use
     - Providing model information and recommendations
-    - Repairing corrupted model files
     """
 
     def __init__(self):
         """Initialize the ModelManager with model definitions and cache directory."""
         self.models = {
             "tiny": {
-                "size": "39 MB",
+                "size": "75 MB",
                 "description": "Fastest, least accurate",
-                "speed": "~32x real-time",
+                "speed": "~100x real-time (GPU batched)",
                 "accuracy": "Basic",
-                "url": "https://openaipublic.azureedge.net/main/whisper/models/65147644a518d12f04e32d6f3b26facc3f8dd46e5390956a9424a650c0ce22b9/tiny.pt",
-                "sha256": "65147644a518d12f04e32d6f3b26facc3f8dd46e5390956a9424a650c0ce22b9",
+                "repo_id": "Systran/faster-whisper-tiny",
             },
             "base": {
-                "size": "74 MB",
+                "size": "145 MB",
                 "description": "Good speed/accuracy balance",
-                "speed": "~16x real-time",
+                "speed": "~80x real-time (GPU batched)",
                 "accuracy": "Good",
-                "url": "https://openaipublic.azureedge.net/main/whisper/models/ed3a0b6b1c0edf879ad9b11b1af5a0e6ab5db9205f891f668f8b0e6c6326e34e/base.pt",
-                "sha256": "ed3a0b6b1c0edf879ad9b11b1af5a0e6ab5db9205f891f668f8b0e6c6326e34e",
+                "repo_id": "Systran/faster-whisper-base",
             },
             "small": {
-                "size": "244 MB",
+                "size": "488 MB",
                 "description": "Better accuracy",
-                "speed": "~6x real-time",
+                "speed": "~60x real-time (GPU batched)",
                 "accuracy": "Better",
-                "url": "https://openaipublic.azureedge.net/main/whisper/models/9ecf779972d90ba49c06d968637d720dd632c55bbf19d441fb42bf17a411e794/small.pt",
-                "sha256": "9ecf779972d90ba49c06d968637d720dd632c55bbf19d441fb42bf17a411e794",
+                "repo_id": "Systran/faster-whisper-small",
             },
             "medium": {
-                "size": "769 MB",
-                "description": "High accuracy (recommended)",
-                "speed": "~2x real-time",
+                "size": "1.5 GB",
+                "description": "High accuracy",
+                "speed": "~40x real-time (GPU batched)",
                 "accuracy": "High",
-                "url": "https://openaipublic.azureedge.net/main/whisper/models/345ae4da62f9b3d59415adc60127b97c714f32e89e936602e85993674d08dcb1/medium.pt",
-                "sha256": "345ae4da62f9b3d59415adc60127b97c714f32e89e936602e85993674d08dcb1",
+                "repo_id": "Systran/faster-whisper-medium",
             },
-            "large": {
-                "size": "1550 MB",
-                "description": "Best accuracy, slowest",
-                "speed": "~1x real-time",
+            "large-v3": {
+                "size": "3.1 GB",
+                "description": "Best accuracy, needs 10GB+ VRAM",
+                "speed": "~20x real-time (GPU batched)",
                 "accuracy": "Maximum",
-                "url": "https://openaipublic.azureedge.net/main/whisper/models/e4b87e7e0bf463eb8e6956e646f1e277e901512310def2c24bf0e11bd3c28e9a/large-v3.pt",
-                "sha256": "e4b87e7e0bf463eb8e6956e646f1e277e901512310def2c24bf0e11bd3c28e9a",
+                "repo_id": "Systran/faster-whisper-large-v3",
+            },
+            "large-v3-turbo": {
+                "size": "1.6 GB",
+                "description": "Fast + accurate - RECOMMENDED",
+                "speed": "~60x real-time (GPU batched)",
+                "accuracy": "High (7.75% WER)",
+                "repo_id": "deepdml/faster-whisper-large-v3-turbo-ct2",
+            },
+            "distil-large-v3": {
+                "size": "1.5 GB",
+                "description": "Distilled, very fast",
+                "speed": "~70x real-time (GPU batched)",
+                "accuracy": "High (within 1% of large-v3)",
+                "repo_id": "Systran/faster-distil-whisper-large-v3",
             },
         }
 
-        # Model cache directory (uses Whisper's default location)
-        self.cache_dir = Path.home() / ".cache" / "whisper"
+        # Model cache directory (faster-whisper uses HuggingFace hub cache)
+        self.cache_dir = Path.home() / ".cache" / "huggingface" / "hub"
         self.download_progress = {}
 
     def get_model_info(self, model_name=None):
@@ -105,47 +110,45 @@ class ModelManager:
         if not self.cache_dir.exists():
             return downloaded
 
-        # Check for model files
-        for model_name in self.models.keys():
-            model_file = self.cache_dir / f"{model_name}.pt"
-            if model_file.exists():
-                size = model_file.stat().st_size
+        # Check for CTranslate2 model directories in HuggingFace cache
+        for model_name, model_info in self.models.items():
+            repo_id = model_info.get("repo_id", "")
+            # HuggingFace stores models in models--org--name format
+            repo_dir_name = "models--" + repo_id.replace("/", "--")
+            model_dir = self.cache_dir / repo_dir_name
 
-                # Verify file integrity
-                is_valid = self.verify_model_file(model_name, model_file)
+            if model_dir.exists():
+                # Calculate total size of model directory
+                total_size = sum(
+                    f.stat().st_size for f in model_dir.rglob("*") if f.is_file()
+                )
 
                 downloaded[model_name] = {
-                    "size_bytes": size,
-                    "size_mb": size / (1024 * 1024),
-                    "path": str(model_file),
-                    "valid": is_valid,
-                    "last_modified": model_file.stat().st_mtime,
+                    "size_bytes": total_size,
+                    "size_mb": total_size / (1024 * 1024),
+                    "path": str(model_dir),
+                    "valid": True,  # If directory exists with files, consider valid
+                    "last_modified": model_dir.stat().st_mtime,
                 }
 
         return downloaded
 
     def verify_model_file(self, model_name, file_path):
-        """Verify model file integrity using SHA256 checksum.
+        """Verify model directory exists and contains expected files.
 
         Args:
             model_name (str): Name of the model to verify
-            file_path (Path): Path to the model file
+            file_path (Path): Path to the model directory
 
         Returns:
-            bool: True if file is valid, False otherwise
+            bool: True if model directory is valid
         """
         try:
-            expected_hash = self.models[model_name]["sha256"]
-
-            # Calculate file hash
-            sha256_hash = hashlib.sha256()
-            with open(file_path, "rb") as f:
-                for chunk in iter(lambda: f.read(4096), b""):
-                    sha256_hash.update(chunk)
-
-            actual_hash = sha256_hash.hexdigest()
-            return actual_hash == expected_hash
-
+            path = Path(file_path)
+            if path.is_dir():
+                # Check for CTranslate2 model files
+                return any(path.rglob("model.bin")) or any(path.rglob("*.bin"))
+            return False
         except Exception as e:
             print(f"Error verifying {model_name}: {e}")
             return False
@@ -154,14 +157,14 @@ class ModelManager:
         """Download specified models or default model.
 
         Args:
-            models (list or str, optional): Model(s) to download. Defaults to ['medium'].
+            models (list or str, optional): Model(s) to download. Defaults to ['large-v3-turbo'].
             progress_callback (callable, optional): Function to call with progress updates
 
         Returns:
             bool: True if at least one model was downloaded successfully
         """
         if models is None:
-            models = ["medium"]  # Default to medium model
+            models = ["large-v3-turbo"]  # Default to large-v3-turbo model
 
         if isinstance(models, str):
             models = [models]
@@ -199,7 +202,10 @@ class ModelManager:
             return False
 
     def download_single_model(self, model_name, progress_callback=None):
-        """Download a single model with progress tracking and verification.
+        """Download a single model using faster-whisper's built-in download.
+
+        faster-whisper automatically downloads CTranslate2 models from HuggingFace
+        when WhisperModel is instantiated. This method triggers that download.
 
         Args:
             model_name (str): Name of the model to download
@@ -212,149 +218,24 @@ class ModelManager:
             if model_name not in self.models:
                 raise ValueError(f"Unknown model: {model_name}")
 
-            model_info = self.models[model_name]
-            url = model_info["url"]
-            expected_hash = model_info["sha256"]
-
-            # Ensure cache directory exists
-            self.cache_dir.mkdir(parents=True, exist_ok=True)
-
-            filename = f"{model_name}.pt"
-            file_path = self.cache_dir / filename
-            temp_path = self.cache_dir / f"{filename}.tmp"
-
-            # Check if model already exists and is valid
-            if file_path.exists():
-                if self.verify_model_file(model_name, file_path):
-                    if progress_callback:
-                        progress_callback(
-                            f"Model {model_name} already exists and is valid"
-                        )
-                    return True
-                else:
-                    print(
-                        f"Existing {model_name} model is corrupted, re-downloading..."
-                    )
-                    file_path.unlink()
-
-            # Download with progress tracking
-            if progress_callback:
-                progress_callback(f"Downloading {model_name} model...")
-
-            response = requests.get(url, stream=True, timeout=30)
-            response.raise_for_status()
-
-            total_size = int(response.headers.get("content-length", 0))
-            downloaded = 0
-
-            # Reset progress tracking
-            self.download_progress[model_name] = {
-                "downloaded": 0,
-                "total": total_size,
-                "percent": 0,
-            }
-
-            start_time = time.time()
-
-            with open(temp_path, "wb") as f:
-                for chunk in response.iter_content(chunk_size=8192):
-                    if chunk:
-                        f.write(chunk)
-                        downloaded += len(chunk)
-
-                        # Update progress
-                        self.download_progress[model_name]["downloaded"] = downloaded
-                        if total_size > 0:
-                            percent = (downloaded / total_size) * 100
-                            self.download_progress[model_name]["percent"] = percent
-
-                            # Calculate download speed
-                            elapsed = time.time() - start_time
-                            if elapsed > 0:
-                                speed_mbps = (downloaded / (1024 * 1024)) / elapsed
-
-                                if progress_callback:
-                                    size_mb = downloaded / (1024 * 1024)
-                                    total_mb = total_size / (1024 * 1024)
-                                    progress_callback(
-                                        f"Downloading {model_name}: {size_mb:.1f}/{total_mb:.1f} MB ({percent:.1f}%) - {speed_mbps:.1f} MB/s"
-                                    )
-
-            # Verify downloaded file
-            if progress_callback:
-                progress_callback(f"Verifying {model_name} model integrity...")
-
-            if not self.verify_model_file_by_path(temp_path, expected_hash):
-                temp_path.unlink()
-                raise Exception(f"Downloaded {model_name} model failed verification")
-
-            # Move to final location
-            temp_path.rename(file_path)
+            # Check if already downloaded
+            downloaded = self.check_downloaded_models()
+            if model_name in downloaded and downloaded[model_name].get("valid", False):
+                if progress_callback:
+                    progress_callback(f"Model {model_name} already exists and is valid")
+                return True
 
             if progress_callback:
-                progress_callback(
-                    f"Model {model_name} downloaded and verified successfully"
-                )
+                progress_callback(f"Downloading {model_name} model from HuggingFace...")
 
-            return True
-
-        except Exception as e:
-            print(f"Failed to download {model_name}: {e}")
-            if progress_callback:
-                progress_callback(f"Download failed for {model_name}: {e}")
-
-            # Clean up temp file
-            temp_path = self.cache_dir / f"{model_name}.pt.tmp"
-            if temp_path.exists():
-                temp_path.unlink()
-
-            return False
-
-    def verify_model_file_by_path(self, file_path, expected_hash):
-        """Verify file integrity by path and expected hash.
-
-        Args:
-            file_path (Path): Path to file to verify
-            expected_hash (str): Expected SHA256 hash
-
-        Returns:
-            bool: True if file matches expected hash
-        """
-        try:
-            sha256_hash = hashlib.sha256()
-            with open(file_path, "rb") as f:
-                for chunk in iter(lambda: f.read(4096), b""):
-                    sha256_hash.update(chunk)
-
-            actual_hash = sha256_hash.hexdigest()
-            return actual_hash == expected_hash
-
-        except Exception:
-            return False
-
-    def download_model_whisper_native(self, model_name, progress_callback=None):
-        """Download model using Whisper's built-in download mechanism.
-
-        Args:
-            model_name (str): Name of the model to download
-            progress_callback (callable, optional): Function to call with progress updates
-
-        Returns:
-            bool: True if download was successful
-        """
-        try:
-            # Create a temporary script to download the model
+            # Create a script that loads the model (triggering download)
             download_script = f"""
-import whisper
 import sys
-import os
-
 try:
-    print(f"Loading {model_name} model...")
-    model = whisper.load_model("{model_name}")
-    print("Model loaded successfully!")
-    print(f"Model device: {{model.device}}")
-    print("Download completed successfully!")
+    from faster_whisper import WhisperModel
+    print("Downloading {model_name} model...")
+    model = WhisperModel("{model_name}", device="cpu", compute_type="int8")
+    print("Model downloaded and loaded successfully!")
 except Exception as e:
     print(f"Download failed: {{e}}", file=sys.stderr)
     sys.exit(1)
@@ -366,40 +247,34 @@ except Exception as e:
                 script_path = f.name
 
             try:
-                if progress_callback:
-                    progress_callback(
-                        f"Using Whisper native download for {model_name}..."
-                    )
-
                 # Run the download script
                 result = subprocess.run(
                     ["python", script_path],
                     capture_output=True,
                     text=True,
                     timeout=1800,
-                )  # 30 min timeout
+                )
 
                 if result.returncode == 0:
                     if progress_callback:
                         progress_callback(
-                            f"Model {model_name} downloaded successfully via Whisper"
+                            f"Model {model_name} downloaded and verified successfully"
                         )
                     return True
                 else:
                     print(f"Download error: {result.stderr}")
                     if progress_callback:
-                        progress_callback(f"Whisper download failed: {result.stderr}")
+                        progress_callback(f"Download failed: {result.stderr}")
                     return False
 
             finally:
-                # Clean up script file
                 if os.path.exists(script_path):
                     os.unlink(script_path)
 
         except Exception as e:
-            print(f"Failed to download {model_name} via Whisper: {e}")
+            print(f"Failed to download {model_name}: {e}")
             if progress_callback:
-                progress_callback(f"Whisper download error: {e}")
+                progress_callback(f"Download failed for {model_name}: {e}")
             return False
 
     def delete_model(self, model_name):
@@ -412,9 +287,16 @@ except Exception as e:
             bool: True if model was deleted successfully
         """
         try:
-            model_file = self.cache_dir / f"{model_name}.pt"
-            if model_file.exists():
-                model_file.unlink()
+            model_info = self.models.get(model_name)
+            if not model_info:
+                return False
+
+            repo_id = model_info.get("repo_id", "")
+            repo_dir_name = "models--" + repo_id.replace("/", "--")
+            model_dir = self.cache_dir / repo_dir_name
+
+            if model_dir.exists():
+                shutil.rmtree(model_dir)
                 print(f"Deleted {model_name} model")
                 return True
             return False
@@ -431,38 +313,38 @@ except Exception as e:
         total_size = 0
 
         if self.cache_dir.exists():
-            for file_path in self.cache_dir.rglob("*.pt"):
-                try:
-                    total_size += file_path.stat().st_size
-                except (OSError, FileNotFoundError):
-                    # Handle case where file is deleted during iteration
-                    continue
+            for model_info in self.models.values():
+                repo_id = model_info.get("repo_id", "")
+                repo_dir_name = "models--" + repo_id.replace("/", "--")
+                model_dir = self.cache_dir / repo_dir_name
+                if model_dir.exists():
+                    for file_path in model_dir.rglob("*"):
+                        if file_path.is_file():
+                            try:
+                                total_size += file_path.stat().st_size
+                            except (OSError, FileNotFoundError):
+                                continue
 
         return total_size
 
     def clear_cache(self):
-        """Clear all downloaded models from cache.
+        """Clear all downloaded whisper models from cache.
 
         Returns:
             bool: True if cache was cleared successfully
         """
         try:
             if self.cache_dir.exists():
-                # Remove all .pt files
-                for file_path in self.cache_dir.glob("*.pt"):
-                    try:
-                        file_path.unlink()
-                        print(f"Removed {file_path.name}")
-                    except (OSError, FileNotFoundError):
-                        # File might have been deleted already
-                        continue
-
-                # Remove any temporary files
-                for file_path in self.cache_dir.glob("*.tmp"):
-                    try:
-                        file_path.unlink()
-                    except (OSError, FileNotFoundError):
-                        continue
+                for model_info in self.models.values():
+                    repo_id = model_info.get("repo_id", "")
+                    repo_dir_name = "models--" + repo_id.replace("/", "--")
+                    model_dir = self.cache_dir / repo_dir_name
+                    if model_dir.exists():
+                        try:
+                            shutil.rmtree(model_dir)
+                            print(f"Removed {repo_dir_name}")
+                        except (OSError, FileNotFoundError):
+                            continue
 
                 print("Model cache cleared successfully")
                 return True
@@ -575,7 +457,7 @@ except Exception as e:
                 "last_modified": (
                     model_data.get("last_modified", 0) if is_downloaded else 0
                 ),
-                "download_url": model_info["url"],
+                "repo_id": model_info.get("repo_id", ""),
                 "estimated_download_time": self.estimate_download_time(model_name),
             }
 
@@ -614,19 +496,10 @@ except Exception as e:
         if accuracy_priority == "speed":
             return "base"
         elif accuracy_priority == "accuracy":
-            return "large"
+            return "large-v3"
         else:
-            # Default balanced recommendation
-            if file_size_mb is None:
-                return "medium"
-
-            # Size-based recommendations
-            if file_size_mb < 10:  # Small files
-                return "small"
-            elif file_size_mb < 100:  # Medium files
-                return "medium"
-            else:  # Large files
-                return "medium"  # Still good balance for large files
+            # Default: large-v3-turbo is the best speed/accuracy tradeoff
+            return "large-v3-turbo"
 
     def batch_download_models(self, model_list, progress_callback=None):
         """Download multiple models in sequence.
@@ -671,7 +544,7 @@ except Exception as e:
                 return True
 
             # Remove temporary files
-            temp_files = list(self.cache_dir.glob("*.tmp"))
+            temp_files = list(self.cache_dir.rglob("*.tmp"))
             for temp_file in temp_files:
                 try:
                     temp_file.unlink()

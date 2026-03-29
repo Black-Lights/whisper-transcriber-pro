@@ -12,9 +12,10 @@ import platform
 from pathlib import Path
 import shutil
 
+
 class WhisperInstaller:
     def __init__(self):
-        self.app_name = "Whisper Transcriber Pro v1.2.0"
+        self.app_name = "Whisper Transcriber Pro v2.0.0"
         self.app_dir = Path(__file__).parent
         self.system = platform.system()
         self.is_windows = self.system == "Windows"
@@ -35,8 +36,11 @@ class WhisperInstaller:
 
         # Check pip
         try:
-            subprocess.run([sys.executable, "-m", "pip", "--version"],
-                          capture_output=True, check=True)
+            subprocess.run(
+                [sys.executable, "-m", "pip", "--version"],
+                capture_output=True,
+                check=True,
+            )
             print("SUCCESS: pip is available")
         except subprocess.CalledProcessError:
             print("ERROR: pip is not available")
@@ -45,6 +49,7 @@ class WhisperInstaller:
         # Check venv
         try:
             import venv
+
             print("SUCCESS: venv module available")
         except ImportError:
             print("ERROR: venv module not available")
@@ -52,11 +57,18 @@ class WhisperInstaller:
 
         # Check for ffmpeg (optional but recommended)
         try:
-            subprocess.run(["ffmpeg", "-version"],
-                          capture_output=True, check=True, timeout=10)
+            subprocess.run(
+                ["ffmpeg", "-version"], capture_output=True, check=True, timeout=10
+            )
             print("SUCCESS: ffmpeg detected")
-        except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired):
-            print("WARNING: ffmpeg not detected (optional - some features may be limited)")
+        except (
+            subprocess.CalledProcessError,
+            FileNotFoundError,
+            subprocess.TimeoutExpired,
+        ):
+            print(
+                "WARNING: ffmpeg not detected (optional - some features may be limited)"
+            )
 
         return True
 
@@ -66,9 +78,13 @@ class WhisperInstaller:
         main_file = self.app_dir / "main.py"
 
         existing_installation = {
-            'venv_exists': venv_dir.exists(),
-            'main_exists': main_file.exists(),
-            'has_batch_file': (self.app_dir / "Whisper_Transcriber.bat").exists() if self.is_windows else (self.app_dir / "whisper_transcriber.sh").exists()
+            "venv_exists": venv_dir.exists(),
+            "main_exists": main_file.exists(),
+            "has_batch_file": (
+                (self.app_dir / "Whisper_Transcriber.bat").exists()
+                if self.is_windows
+                else (self.app_dir / "whisper_transcriber.sh").exists()
+            ),
         }
 
         return existing_installation
@@ -93,8 +109,12 @@ class WhisperInstaller:
 
         try:
             # Test virtual environment
-            result = subprocess.run([str(python_exe), "--version"],
-                                  capture_output=True, text=True, timeout=10)
+            result = subprocess.run(
+                [str(python_exe), "--version"],
+                capture_output=True,
+                text=True,
+                timeout=10,
+            )
             if result.returncode != 0:
                 print("ERROR: Virtual environment is not working properly")
                 return False
@@ -105,8 +125,12 @@ class WhisperInstaller:
             print("   Installing new dependencies...")
 
             # Install psutil for process management
-            result = subprocess.run([str(pip_exe), "install", "psutil>=5.9.0"],
-                                  capture_output=True, text=True, timeout=300)
+            result = subprocess.run(
+                [str(pip_exe), "install", "psutil>=5.9.0"],
+                capture_output=True,
+                text=True,
+                timeout=300,
+            )
 
             if result.returncode == 0:
                 print("   SUCCESS: psutil installed for process management")
@@ -117,17 +141,19 @@ class WhisperInstaller:
             print("   Upgrading existing packages...")
 
             packages_to_upgrade = [
-                "openai-whisper>=20231117",
-                "torch>=2.0.0",
-                "torchaudio>=2.0.0",
+                "faster-whisper>=1.0.0",
                 "numpy>=1.24.0",
-                "tqdm>=4.65.0"
+                "tqdm>=4.65.0",
             ]
 
             for package in packages_to_upgrade:
                 try:
-                    subprocess.run([str(pip_exe), "install", "--upgrade", package],
-                                 capture_output=True, text=True, timeout=300)
+                    subprocess.run(
+                        [str(pip_exe), "install", "--upgrade", package],
+                        capture_output=True,
+                        text=True,
+                        timeout=300,
+                    )
                     print(f"   Updated: {package.split('>=')[0]}")
                 except:
                     print(f"   Warning: Could not update {package.split('>=')[0]}")
@@ -143,12 +169,7 @@ class WhisperInstaller:
         """Create application directory structure"""
         print("\nCreating directory structure...")
 
-        directories = [
-            "src",
-            "logs",
-            "temp",
-            "models"
-        ]
+        directories = ["src", "logs", "temp", "models"]
 
         for directory in directories:
             dir_path = self.app_dir / directory
@@ -163,37 +184,37 @@ class WhisperInstaller:
 
         if self.is_windows:
             # Create Windows batch file
-            batch_content = f'''@echo off
+            batch_content = f"""@echo off
 cd /d "{self.app_dir}"
 call whisper_env\\Scripts\\activate.bat
 python main.py
 pause
-'''
+"""
             batch_file = self.app_dir / "Whisper_Transcriber.bat"
-            with open(batch_file, 'w') as f:
+            with open(batch_file, "w") as f:
                 f.write(batch_content)
             print("   Created: Whisper_Transcriber.bat")
 
             # Create setup batch file
-            setup_batch = f'''@echo off
+            setup_batch = f"""@echo off
 cd /d "{self.app_dir}"
 python install.py
 pause
-'''
+"""
             setup_file = self.app_dir / "Setup.bat"
-            with open(setup_file, 'w') as f:
+            with open(setup_file, "w") as f:
                 f.write(setup_batch)
             print("   Created: Setup.bat")
 
         else:
             # Create shell script for Unix/Linux/Mac
-            script_content = f'''#!/bin/bash
+            script_content = f"""#!/bin/bash
 cd "{self.app_dir}"
 source whisper_env/bin/activate
 python main.py
-'''
+"""
             script_file = self.app_dir / "whisper_transcriber.sh"
-            with open(script_file, 'w') as f:
+            with open(script_file, "w") as f:
                 f.write(script_content)
             script_file.chmod(0o755)  # Make executable
             print("   Created: whisper_transcriber.sh")
@@ -240,7 +261,9 @@ python main.py
             def progress_callback(message):
                 print(f"   {message}")
 
-            success = model_manager.download_models(["medium"], progress_callback)
+            success = model_manager.download_models(
+                ["large-v3-turbo"], progress_callback
+            )
 
             if success:
                 print("   SUCCESS: Default model downloaded")
@@ -268,10 +291,10 @@ python main.py
             # Check for existing installation
             existing = self.check_existing_installation()
 
-            if existing['venv_exists'] and existing['main_exists']:
-                print("\n" + "="*50)
+            if existing["venv_exists"] and existing["main_exists"]:
+                print("\n" + "=" * 50)
                 print("EXISTING INSTALLATION DETECTED")
-                print("="*50)
+                print("=" * 50)
                 print("Found existing Whisper Transcriber Pro installation.")
                 print("This will update your installation with new features:")
                 print("  • Live transcription display")
@@ -281,11 +304,11 @@ python main.py
                 print()
 
                 update_choice = input("Update existing installation? (Y/n): ").lower()
-                if update_choice != 'n':
+                if update_choice != "n":
                     if self.update_existing_installation():
-                        print("\n" + "="*50)
+                        print("\n" + "=" * 50)
                         print("UPDATE COMPLETED!")
-                        print("="*50)
+                        print("=" * 50)
                         print("\nYour installation has been updated with new features!")
                         print("You can now use your existing launcher:")
                         if self.is_windows:
@@ -299,15 +322,17 @@ python main.py
                         print("   • Enhanced progress tracking")
                         return True
                     else:
-                        print("\nWARNING: Update failed, proceeding with fresh installation...")
+                        print(
+                            "\nWARNING: Update failed, proceeding with fresh installation..."
+                        )
                 else:
                     print("Update cancelled by user")
                     return False
 
             # Fresh installation
-            print("\n" + "="*50)
+            print("\n" + "=" * 50)
             print("FRESH INSTALLATION")
-            print("="*50)
+            print("=" * 50)
 
             # Create structure
             if not self.create_directory_structure():
@@ -320,24 +345,34 @@ python main.py
                 return False
 
             # Ask about environment setup
-            print("\n" + "="*50)
+            print("\n" + "=" * 50)
             print("INSTALLATION OPTIONS")
-            print("="*50)
+            print("=" * 50)
 
-            setup_env = input("Set up virtual environment now? (y/N): ").lower().startswith('y')
+            setup_env = (
+                input("Set up virtual environment now? (y/N): ").lower().startswith("y")
+            )
 
             if setup_env:
                 if not self.setup_environment():
-                    print("\nWARNING: Environment setup failed, but you can run it later from the app")
+                    print(
+                        "\nWARNING: Environment setup failed, but you can run it later from the app"
+                    )
                 else:
                     # Ask about model download
-                    download_model = input("\nDownload default model (medium, ~769MB)? (y/N): ").lower().startswith('y')
+                    download_model = (
+                        input(
+                            "\nDownload default model (large-v3-turbo, ~1.6GB)? (y/N): "
+                        )
+                        .lower()
+                        .startswith("y")
+                    )
                     if download_model:
                         self.download_default_model()
 
-            print("\n" + "="*50)
+            print("\n" + "=" * 50)
             print("INSTALLATION COMPLETED!")
-            print("="*50)
+            print("=" * 50)
 
             print("\nNEXT STEPS:")
             if self.is_windows:
@@ -363,6 +398,7 @@ python main.py
             print(f"\nERROR: Installation failed: {e}")
             return False
 
+
 def main():
     """Main installer entry point"""
     installer = WhisperInstaller()
@@ -380,6 +416,7 @@ def main():
     except Exception as e:
         print(f"\nFatal error: {e}")
         input("\nPress Enter to exit...")
+
 
 if __name__ == "__main__":
     main()
