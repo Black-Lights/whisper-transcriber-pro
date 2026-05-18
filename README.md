@@ -7,7 +7,7 @@
 
 **Professional AI-powered audio and video transcription with live preview and GPU acceleration**
 
-Transform your audio and video files into accurate transcripts using faster-whisper (CTranslate2) with batched GPU inference. Features real-time transcription display, professional output formats, and up to 50x faster processing than the original Whisper.
+Transform your audio and video files into accurate transcripts using faster-whisper (CTranslate2) with batched GPU inference. Features real-time transcription display, professional output formats, and blazing fast processing — **a 1-hour video transcribed in ~72 seconds** with the large-v3-turbo model on GPU.
 
 ## Screenshots
 
@@ -16,7 +16,7 @@ Transform your audio and video files into accurate transcripts using faster-whis
 
 ## What's New in v2.0.0 - Turbo Edition
 
-- **10-50x Faster Transcription** - Switched from openai-whisper to faster-whisper (CTranslate2 backend)
+- **~50x Faster Transcription** - Switched from openai-whisper to faster-whisper; 1-hour video in ~72 seconds (measured)
 - **Batched GPU Inference** - Process multiple audio chunks simultaneously for maximum throughput
 - **New Default Model: large-v3-turbo** - Better accuracy than medium at similar speed (~7.75% WER)
 - **INT8 Quantization** - Runs on GPUs with just 6GB VRAM (e.g., RTX 3060)
@@ -144,9 +144,11 @@ The application will automatically download required models on first run.
 | base | 145 MB | ~80x real-time | ~12% | ~1 GB | Clear audio |
 | small | 488 MB | ~60x real-time | ~10% | ~2 GB | General use |
 | medium | 1.5 GB | ~40x real-time | ~8.5% | ~5 GB | High accuracy |
-| **large-v3-turbo** | **1.6 GB** | **~60x real-time** | **7.75%** | **~6 GB** | **Recommended** |
+| **large-v3-turbo** | **1.6 GB** | **~50x real-time** ✅ | **7.75%** | **~6 GB** | **Recommended** |
 | large-v3 | 3.1 GB | ~20x real-time | 7.4% | ~10 GB | Maximum accuracy |
 | distil-large-v3 | 1.5 GB | ~70x real-time | ~7.5% | ~5 GB | Fast + accurate |
+
+> ✅ *Measured on real hardware: 1:00:07 video → 71.8s, 30:32 video → 43.0s (NVIDIA GPU, large-v3-turbo)*
 
 ## System Requirements
 
@@ -170,11 +172,18 @@ The application will automatically download required models on first run.
 
 ## Performance Benchmarks
 
+### Real-World Results (large-v3-turbo, NVIDIA GPU)
+
+| File | Duration | File Size | Processing Time | Speed |
+|------|----------|-----------|-----------------|-------|
+| Lecture recording | 1:00:07 | 3.7 GB | **71.8 seconds** | ~50x real-time |
+| Meeting recording | 30:32 | 1.8 GB | **43.0 seconds** | ~43x real-time |
+
 ### v2.0 vs v1.2 Comparison (RTX 3060, 6GB VRAM)
 
 | Metric | v1.2 (openai-whisper) | v2.0 (faster-whisper) |
 |--------|----------------------|----------------------|
-| **1-hour audio** | ~24 minutes | ~1-2 minutes |
+| **1-hour audio** | ~24 minutes | **~72 seconds** ✅ |
 | **Model** | medium (769 MB) | large-v3-turbo (1.6 GB) |
 | **Accuracy (WER)** | ~8.5% | ~7.75% |
 | **VRAM Usage** | ~5 GB | ~1.5 GB (INT8) |
@@ -182,8 +191,9 @@ The application will automatically download required models on first run.
 | **Live Updates** | After transcription | During transcription |
 | **VAD Filtering** | None | Silero VAD v6 |
 
-### Processing Speed (RTX 3060, 6GB VRAM)
-- **1 hour audio + large-v3-turbo** = ~1-2 minutes (vs ~24 min with v1.2)
+### Processing Speed (GPU)
+- **1 hour audio + large-v3-turbo** = ~72 seconds (measured) vs ~24 min with v1.2
+- **30 min audio + large-v3-turbo** = ~43 seconds (measured)
 - **Live segment streaming** during transcription (not after)
 - **VRAM usage**: ~1.5 GB with INT8 quantization
 - **First run**: Add ~5-10 min for one-time model download (~1.6 GB)
